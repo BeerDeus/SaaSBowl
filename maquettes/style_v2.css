@@ -1,0 +1,4266 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* === Toasts (notifications non-bloquantes) === */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+    width: max-content;
+    max-width: 90vw;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #2c3e50;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    font-size: 0.95em;
+    font-weight: bold;
+    opacity: 0;
+    transform: translateY(-16px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast .toast-icon {
+    font-size: 1.1em;
+}
+
+.toast-success { background-color: #27ae60; }
+.toast-error   { background-color: #e74c3c; }
+.toast-info    { background-color: #2c3e50; }
+
+/* Bannière "hors-ligne" (perte de connexion Firebase/réseau) */
+#offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100001;
+    background-color: #e74c3c;
+    color: #fff;
+    text-align: center;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 0.95em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Ajouter ces styles à la fin du fichier */
+
+
+.counter {
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    height: 240px;
+   
+}
+
+.counter h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.counter-display {
+    font-size: 2.5em;
+    font-family: monospace;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.start-btn {
+    background-color: #2ecc71;
+}
+
+.start-btn:hover {
+    background-color: #27ae60;
+}
+
+.stop-btn {
+    background-color: #f39c12;
+}
+
+.stop-btn:hover {
+    background-color: #d35400;
+}
+
+.reset-btn {
+    background-color: #e74c3c;
+}
+
+.reset-btn:hover {
+    background-color: #c0392b;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    padding: 2px 5px;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+.calendar-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.date-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.rooms-container {
+    display: flex;
+    gap: 20px;
+}
+
+.room {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.room h3 {
+    margin-top: 0;
+    text-align: center;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.time-slot {
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #e9f7fe;
+    border-left: 4px solid #3498db;
+    /* Empêche la sélection du texte à l'intérieur du créneau */
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none;     /* IE 10+ et Edge */
+    user-select: none;         /* Syntaxe standard */
+}
+
+.time-slot.booked {
+    background-color: #ffe8e8;
+    border-left-color: #e74c3c;
+}
+
+.time-slot-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.time-slot-info {
+    font-size: 14px;
+    color: #555;
+}
+
+.time-slots {
+    max-height: none; 
+    overflow-y: visible;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Deux colonnes côte à côte par défaut */
+    gap: 6px; 
+    align-content: start;
+}
+.preset-buttons {
+    display: flex;
+    gap: 10px;
+    height: 40px;
+    justify-content: center;
+}
+
+.preset-buttons button {
+    background-color: #9b59b6;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.preset-buttons button:hover {
+    background-color: #8e44ad;
+}
+
+.timer-ended {
+    animation: blink 1s linear infinite;
+    color: #e74c3c;
+}
+
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* NOUVELLE ANIMATION pour le clignotement rouge du fond */
+@keyframes blink-red-bg {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(231, 76, 60, 0.3); } /* Un rouge transparent et visible */
+    100% { background-color: transparent; }
+}
+
+.counter-display.timer-ended {
+    color: #e74c3c;
+    /* On combine l'animation d'opacité existante et la nouvelle animation de fond */
+    animation: blink 1s infinite, blink-red-bg 1s infinite;
+}
+
+/* Chrono EN PAUSE : temps figé, distinct du "00:00" d'un Reset et du rouge clignotant d'un timer terminé */
+.counter-display.timer-paused {
+    color: #f39c12;
+    background-color: #fff8e1;
+}
+
+/* Bouton "Stop" qui devient "▶ Reprendre" quand le chrono est en pause */
+.stop-btn.is-paused {
+    background-color: #2ecc71;
+}
+
+.stop-btn.is-paused:hover {
+    background-color: #27ae60;
+}
+
+/* --- AJOUTS POUR LES NOUVELLES FONCTIONNALITÉS --- */
+
+/* Conteneur pour les 2 switches côte à côte */
+.switches-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+/* Wrapper pour chaque switch (label + interrupteur) */
+.switch-wrapper {
+    flex: 1; /* Chaque wrapper prend 50% de la largeur disponible */
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.switch-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+    color: #333;
+}
+
+/* Le conteneur visuel du switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 120px; /* Largeur pour contenir le texte */
+    height: 34px;
+}
+
+/* On cache la checkbox HTML */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Le "slider", la partie cliquable */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #3498db; /* Couleur par défaut (gauche / "off") */
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0,0,0,0.4);
+}
+
+/* Texte à l'intérieur du slider */
+.slider:after {
+    content: attr(data-off); /* Texte pour l'état "off" */
+    color: white;
+    display: block;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 75%; /* Positionné à droite du curseur */
+    font-size: 14px;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+input:checked + .slider {
+    background-color: #2ecc71; /* Couleur quand coché (droite / "on") */
+}
+
+input:checked + .slider:before {
+    transform: translateX(86px); /* Mouvement du curseur */
+}
+
+input:checked + .slider:after {
+    content: attr(data-on); /* Texte pour l'état "on" */
+    left: 25%; /* Positionné à gauche du curseur */
+}
+
+/* --- MODIFICATION DU CALENDRIER --- */
+.time-slots {
+    /* On remplace la hauteur fixe et le scroll par une grille */
+    max-height: none; 
+    overflow-y: visible;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Crée deux colonnes */
+    gap: 6px; /* Espace entre les créneaux */
+    align-content: start;
+}
+
+/* --- AJOUTS POUR LES NOUVELLES FONCTIONNALITÉS V2 --- */
+
+/* Style pour le groupe de boutons radio (Salle Haut/Bas) */
+.radio-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Espace entre les deux options */
+    height: 34px; /* Pour aligner avec le switch de durée */
+}
+.radio-group div {
+    display: flex;
+    align-items: center;
+}
+.radio-group label {
+    margin-left: 5px;
+    font-weight: normal; /* Le label du groupe est déjà en gras */
+}
+
+/* Style pour les créneaux réservés ET payés */
+.time-slot.booked.paid {
+    background-color: #d4edda; /* Vert pastel */
+    border-left-color: #28a745; /* Vert plus soutenu */
+}
+
+/* Style pour la checkbox "Payé" dans le calendrier */
+.paid-checkbox-container {
+    margin-top: 10px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+}
+
+.paid-checkbox-container input {
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+/* Ajoutez ces règles à la fin de votre fichier CSS */
+
+/* Nouveau style pour les groupes de champs côte à côte */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    min-width: 0; /* Empêche le débordement */
+}
+
+/* Ajustement pour les petits écrans */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+
+/* Ajustement spécifique pour la ligne Date/Heure/Joueurs */
+.form-row .form-group[style*="flex: 4"] {
+    flex: 4; /* 40% de l'espace disponible */
+}
+
+.form-row .form-group[style*="flex: 2"] {
+    flex: 2; /* 20% de l'espace disponible */
+}
+
+/* Ajustement pour les petits écrans */
+@media (max-width: 768px) {
+    .form-row .form-group[style*="flex: 4"],
+    .form-row .form-group[style*="flex: 2"] {
+        flex: 1; /* Retour à 100% en mode mobile */
+    }
+}
+
+.top-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.counters-container {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.counters-containerDisplay {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    width: 100%;
+    min-width: fit-content; /* S'adapte au contenu */
+    margin-bottom: 20px;
+}
+
+.counter {
+    flex: 1;
+    min-width: 220px;
+}
+
+/* Pour les écrans plus petits */
+@media (max-width: 1200px) {
+    .counter {
+        flex: 0 0 48%; /* 2 compteurs par ligne */
+    }
+}
+
+@media (max-width: 768px) {
+    .counter {
+        flex: 0 0 100%; /* 1 compteur par ligne */
+    }
+}
+
+.counter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.counter-controls button,
+.counter-controls input {
+    padding: 5px 8px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+.custom-time-input {
+    width: 70px;
+    text-align: center;
+}
+
+/* Conserver les couleurs */
+.stop-btn { background-color: #f39c12; }
+.reset-btn { background-color: #e74c3c; }
+.preset-btn { background-color: #9b59b6; }
+.start-custom-btn { background-color: #2ecc71; }
+
+/* Styles pour les boutons de réservation */
+.reservation-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.monte-btn {
+    background-color: hsl(10, 82%, 45%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left:50%
+}
+
+.monte-btn:hover {
+    background-color: #2980b9;
+}
+
+.monte-btn.active {
+    background-color: #2ecc71;
+}
+
+
+.credit{
+    padding-top: 10px;
+    text-align: center;
+}
+.date-picker-container {
+    position: relative;
+    display: inline-block;
+}
+
+#calendar-input,
+#qk-calendar-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+#calendar-input::-webkit-calendar-picker-indicator,
+#qk-calendar-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+
+/* Style des créneaux fermés */
+.time-slot.closed {
+    background-color: #f8f9fa !important;
+    border-left: 4px solid #6c757d !important;
+    opacity: 0.7;
+}
+
+.time-slot.closed .time-slot-header {
+    color: #6c757d;
+    text-decoration: line-through;
+}
+
+.closed-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    
+    /* Le conteneur ne prend que la largeur de son contenu (la case + le texte) */
+    width: fit-content; 
+    
+    /* Pousse le conteneur (maintenant de taille réduite) complètement à droite */
+    margin-left: auto; 
+    
+    /* On ajuste la marge pour un meilleur alignement vertical */
+    margin-top: 4px; 
+}
+.closed-checkbox-container checkbox
+
+.closed-checkbox-container label {
+    cursor: pointer;
+    font-size: 13px;
+    color: #6c757d;
+    margin-top:5px;
+}
+
+/* Animation douce de fond jaune */
+@keyframes subtlePulse {
+    0% { background-color: normal; }
+    50% { background-color: #ffeb35; } /* Jaune très clair */
+    100% { background-color: normal; }
+}
+
+.one-minute-left {
+    animation: subtlePulse 2s infinite ease-in-out;
+    border: none !important; /* Supprime tout bord rouge */
+}
+
+@keyframes emergencyFlash {
+    0% { background-color: #ffc107; }
+    100% { background-color: #ff5252; }
+}
+
+/* Pour le titre de l'onglet */
+.title-alert {
+    background-color: #ffc107;
+}
+
+.time-slot.auto-closed {
+    background-color: #f0f0f0; /* Un gris très clair */
+    color: #b0b0b0;
+    justify-content: center;
+    align-items: center;
+    font-style: italic;
+}
+
+.auto-closed-text {
+    font-size: 1.1em;
+}
+
+/* Styles pour le Modal (Pop-up) */
+.modal {
+    display: none; /* Caché par défaut */
+    position: fixed; /* Reste en place même en scrollant */
+    z-index: 1000; /* Plus haut que tout le reste */
+    left: 0;
+    top: 0;
+    width: 100%; /* Pleine largeur */
+    height: 100%; /* Pleine hauteur */
+    overflow: auto; /* Permet le scroll si le contenu est trop grand */
+    background-color: rgba(0,0,0,0.6); /* Fond semi-transparent noir */
+    backdrop-filter: blur(5px); /* Effet de flou sur l'arrière-plan */
+    -webkit-backdrop-filter: blur(5px); /* Pour Safari */
+    justify-content: center; /* Centre le contenu horizontalement */
+    align-items: center; /* Centre le contenu verticalement */
+}
+
+/* La confirmation/alerte maison doit toujours passer AU-DESSUS de n'importe quelle modale
+   (le plus haut z-index de modale existant est prophet-modal à 5000) — sinon un showCustomAlert()
+   déclenché depuis une modale à fort z-index (ex: Vérification, 4500) s'ouvre invisible derrière. */
+#custom-alert-modal {
+    z-index: 6000;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto; /* Ajuste la marge pour le centrage vertical */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; /* Peut être ajusté */
+    max-width: 600px; /* Largeur maximale pour ne pas être trop grand */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute; /* Position absolue par rapport au .modal-content */
+    top: 10px;
+    right: 20px;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Ajustements pour les boutons dans le modal si nécessaire */
+.modal-content .button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content .delete-btn {
+    background-color: #dc3545; /* Couleur rouge pour supprimer */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.modal-content .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.settings-btn {
+    position: fixed; /* Reste fixe à l'écran, même au scroll */
+    bottom: 20px;    /* 20px du bas */
+    right: 20px;     /* 20px de la droite */
+    z-index: 999;    /* Pour qu'il soit au-dessus du contenu (mais sous le pop-up) */
+
+    /* Aspect plus petit et discret */
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #333; /* Couleur sobre */
+    color: white;
+    border: none;
+    border-radius: 50px; /* Forme de pilule */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out; /* Animation douce */
+}
+
+.settings-btn:hover {
+    background-color: #555; /* S'éclaircit au survol */
+    transform: translateY(-2px); /* Léger mouvement vers le haut */
+}
+
+.button-secondary {
+    background-color: #6c757d; /* Gris */
+    font-size: 14px;
+    padding: 8px 12px;
+}
+
+.button-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Style pour le conteneur de groupe de joueurs dans le modal */
+.edit-group-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+.edit-group-row input {
+    width: 80px; /* Taille réduite pour le nombre de joueurs */
+}
+
+.left-buttons {
+    display: flex;
+    gap: 8px; /* Espace entre les deux boutons */
+    align-items: center;
+}
+
+/* Style pour le bouton d'édition pour le rendre petit */
+.edit-btn {
+    background-color: #f39c12; /* Orange */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px; /* Taille du bouton */
+    font-size: 14px;
+    cursor: pointer;
+    line-height: 1; /* Aide à bien centrer l'emoji */
+}
+
+.edit-btn:hover {
+    background-color: #e67e22;
+}
+
+/* On s'assure que le conteneur principal répartit bien les éléments */
+.reservation-buttons {
+    justify-content: space-between; /* Pousse les boutons de gauche à gauche et "Payé" à droite */
+}
+
+#custom-alert-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.time-slot.dragging {
+    opacity: 0.5;
+    border: 2px dashed #333;
+}
+
+/* Style pour un créneau vide survolé (cible valide) */
+.time-slot.drag-over {
+    background-color: #d4edda; /* Vert pastel pour indiquer une zone de drop valide */
+    border: 2px dashed #28a745;
+}
+
+/* Curseur de déplacement pour les créneaux déplaçables */
+.time-slot[draggable="true"] {
+    cursor: move;
+}
+
+.time-slot.booked.anniversaire {
+    background-color: #d8bcf1; /* Violet pastel */
+    border-left-color: #8e44ad; /* Violet plus soutenu */
+}
+
+.time-slot.booked.groupe {
+    background-color: #f79ca5; /* Rouge plus clair et distinct */
+    border-left-color: #c0392b; /* Rouge plus soutenu */
+}
+
+.time-slot.booked.crm-synced {
+    outline: 2px dashed #2196f3;
+    outline-offset: -2px;
+}
+
+#crm-alert-btn {
+    position: fixed;
+    bottom: 85px; /* au-dessus de la rangée de boutons ronds (Options/Note), évite le chevauchement */
+    right: 20px;
+    z-index: 10001; /* au-dessus du bouton Note (10000) */
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 16px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 12px 4px rgba(231, 76, 60, 0.8);
+    animation: crm-alert-blink 1s infinite;
+}
+
+.crm-alert-count {
+    background: #fff;
+    color: #e74c3c;
+    border-radius: 50%;
+    padding: 2px 8px;
+}
+
+@keyframes crm-alert-blink {
+    0%, 100% { box-shadow: 0 0 8px 2px rgba(231, 76, 60, 0.7); transform: scale(1); }
+    50% { box-shadow: 0 0 20px 8px rgba(231, 76, 60, 1); transform: scale(1.05); }
+}
+
+#crm-alert-panel {
+    display: none;
+    position: fixed;
+    bottom: 140px;
+    right: 20px;
+    z-index: 10001;
+    width: 340px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #fff;
+    color: #222;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    padding: 12px;
+}
+
+.crm-alert-panel-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #e74c3c;
+}
+
+.crm-alert-item {
+    border-bottom: 1px solid #eee;
+    padding: 8px;
+    margin-bottom: 4px;
+    border: 1px dashed #3498db;
+    border-radius: 6px;
+    cursor: grab;
+    background: #f4faff;
+}
+
+.crm-alert-item:active {
+    cursor: grabbing;
+}
+
+.crm-alert-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.crm-alert-jump-btn {
+    flex: 1;
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.crm-alert-resolve-btn {
+    background: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+}
+
+/* Créneau ciblé par une alerte CRM, mis en surbrillance après clic sur "Voir le créneau" */
+.time-slot.crm-alert-target {
+    animation: crm-alert-target-pulse 1s ease-in-out infinite;
+    outline: 3px solid #3498db;
+    outline-offset: -3px;
+}
+
+@keyframes crm-alert-target-pulse {
+    0%, 100% { box-shadow: 0 0 6px 2px rgba(52, 152, 219, 0.6); }
+    50% { box-shadow: 0 0 18px 6px rgba(52, 152, 219, 1); }
+}
+
+.bd-date-controls {
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    font-size: 0.85em;
+}
+
+.bd-date-controls button {
+    padding: 4px 10px;
+    font-size: 0.9em;
+}
+
+.bd-date-controls #bd-current-date {
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.bd-date-controls input[type="date"] {
+    padding: 3px 6px;
+    font-size: 0.9em;
+    vertical-align: middle;
+}
+
+.bd-champomy-stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.bd-champomy-stepper button {
+    width: 22px;
+    height: 22px;
+    line-height: 1;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #3498db;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Thème sombre — pas de variables CSS dans ce fichier (couleurs en dur partout), donc au lieu de
+   tout réécrire on cible les vrais composants (fond/texte/bordures) + les couleurs d'état des
+   créneaux une par une (équivalent sombre de chaque pastel, pas un filtre global qui casse tout). */
+body.dark-theme {
+    background-color: #121212;
+    color: #e4e4e4;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4,
+body.dark-theme h5,
+body.dark-theme label {
+    color: #f0f0f0;
+}
+
+body.dark-theme a {
+    color: #6ab7ff;
+}
+
+/* Conteneurs principaux (salles, modales, fiches, panneaux) */
+body.dark-theme .room,
+body.dark-theme .modal-content,
+body.dark-theme .birthday-card,
+body.dark-theme .birthday-form-container,
+body.dark-theme .notes-panel-content,
+body.dark-theme .crm-alert-panel,
+body.dark-theme .bd-mini-card,
+body.dark-theme .queue-item {
+    background-color: #1e1e1e;
+    color: #e4e4e4;
+    border-color: #3a3a3e;
+}
+
+body.dark-theme .room h3,
+body.dark-theme .view-toggle-btn {
+    background-color: #2a2a2e;
+    color: #d0d0d0;
+}
+
+body.dark-theme .view-toggle-btn.active {
+    background-color: #1e1e1e;
+}
+
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea {
+    background-color: #2a2a2e;
+    color: #e4e4e4;
+    border-color: #3a3a3e;
+}
+
+/* Créneaux — équivalent sombre de chaque couleur pastel (garde le code couleur rouge/vert/violet) */
+body.dark-theme .time-slot {
+    background-color: #16232d;
+    color: #e4e4e4;
+}
+body.dark-theme .time-slot-info {
+    color: #c8c8c8;
+}
+body.dark-theme .time-slot.booked {
+    background-color: #3a1f1f;
+}
+body.dark-theme .time-slot.booked.paid {
+    background-color: #1c3324;
+}
+body.dark-theme .time-slot.booked.anniversaire {
+    background-color: #2e2140;
+}
+body.dark-theme .time-slot.booked.groupe {
+    background-color: #3a1a22;
+}
+body.dark-theme .time-slot.closed,
+body.dark-theme .time-slot.auto-closed {
+    background-color: #232323;
+    color: #888;
+}
+
+body.dark-theme .crm-alert-item {
+    background-color: #16232d;
+}
+
+body.dark-theme .bd-date-separator {
+    color: #e4e4e4;
+}
+
+/* Compteurs (chronos) et bandeau "Calendrier des Réservations" — fonds restés blancs alors que
+   les titres h1-h5 passent en clair plus haut, d'où le texte clair-sur-blanc quasi invisible. */
+body.dark-theme .counter,
+body.dark-theme .calendar-container {
+    background-color: #1e1e1e;
+    color: #e4e4e4;
+    border-color: #3a3a3e;
+}
+
+/* Groupe "Venu"/arrivé: fond vert posé en style INLINE par le JS (style.backgroundColor), donc
+   plus prioritaire que n'importe quelle règle CSS classique -> !important obligatoire ici. */
+body.dark-theme .group-item-card {
+    background-color: #1e1e1e !important;
+    color: #e4e4e4;
+    border-color: #3a3a3e;
+}
+
+body.dark-theme .counter h3,
+body.dark-theme .group-item-card h5 {
+    color: #f0f0f0;
+}
+
+body.dark-theme .counter-display {
+    background-color: #2a2a2e;
+    color: #e4e4e4;
+}
+
+body.dark-theme .group-act-badge {
+    background-color: #3a3a3e;
+    color: #c8c8c8;
+}
+
+/* Puce formule + zone checklist de la fiche anniversaire (fonds pastel oubliés) */
+body.dark-theme .birthday-formula {
+    background-color: #3a2e40;
+    color: #e4e4e4;
+}
+body.dark-theme .checklist-container {
+    background-color: #232323;
+}
+body.dark-theme .bd-count-controls {
+    color: #c8c8c8;
+}
+body.dark-theme .bd-count-controls span[style*="color"] {
+    color: #f0f0f0 !important;
+}
+
+/* Survol d'un créneau libre: vert pastel trop vif sur fond sombre -> version foncée */
+body.dark-theme .time-slot:not(.booked):not(.closed):not(.auto-closed):hover {
+    background-color: #1c3324;
+    border-left-color: #28a745;
+}
+
+/* === Easter egg : thème "rouge électrique" (clic caché sur le "s" du titre) === */
+@keyframes electricShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body.electric-theme {
+    background: linear-gradient(135deg, #1a0000, #8b0000, #ff0044, #3a0000);
+    background-size: 400% 400%;
+    animation: electricShift 8s ease infinite;
+    color: #ffe4e4;
+}
+
+body.electric-theme h1,
+body.electric-theme h2,
+body.electric-theme h3,
+body.electric-theme h4,
+body.electric-theme h5,
+body.electric-theme label {
+    color: #fff;
+    text-shadow: 0 0 10px #ff1744, 0 0 20px #ff0044;
+}
+
+body.electric-theme a {
+    color: #ff6e7f;
+}
+
+body.electric-theme .room,
+body.electric-theme .modal-content,
+body.electric-theme .birthday-card,
+body.electric-theme .birthday-form-container,
+body.electric-theme .notes-panel-content,
+body.electric-theme .crm-alert-panel,
+body.electric-theme .bd-mini-card,
+body.electric-theme .queue-item,
+body.electric-theme .counter,
+body.electric-theme .calendar-container {
+    background: linear-gradient(145deg, #200005, #4d0011);
+    color: #ffe4e4;
+    border-color: #ff1744;
+    box-shadow: 0 0 18px rgba(255, 23, 68, 0.35);
+}
+
+body.electric-theme .group-item-card {
+    background: linear-gradient(145deg, #200005, #4d0011) !important;
+    color: #ffe4e4;
+    border-color: #ff1744;
+}
+
+body.electric-theme .room h3,
+body.electric-theme .view-toggle-btn,
+body.electric-theme .counter-display,
+body.electric-theme .group-item-card h5 {
+    background: linear-gradient(135deg, #ff1744, #8b0000);
+    color: #fff;
+}
+
+body.electric-theme .view-toggle-btn.active {
+    background: linear-gradient(135deg, #ff4569, #b3001b);
+    box-shadow: 0 0 12px #ff1744;
+}
+
+body.electric-theme .group-act-badge {
+    background: #4d0011;
+    color: #ffb3c1;
+}
+
+body.electric-theme .birthday-formula {
+    background: linear-gradient(135deg, #4d0011, #8b0033);
+    color: #ffe4e4;
+}
+body.electric-theme .checklist-container {
+    background-color: #200005;
+}
+body.electric-theme .bd-count-controls {
+    color: #ffb3c1;
+}
+body.electric-theme .bd-count-controls span[style*="color"] {
+    color: #ff6e7f !important;
+}
+
+body.electric-theme input,
+body.electric-theme select,
+body.electric-theme textarea {
+    background-color: #2a0007;
+    color: #ffe4e4;
+    border-color: #ff1744;
+}
+
+body.electric-theme .time-slot {
+    background: linear-gradient(135deg, #1a0004, #3a000c);
+    color: #ffe4e4;
+}
+body.electric-theme .time-slot-info {
+    color: #ffd0d6;
+}
+body.electric-theme .time-slot.booked {
+    background: linear-gradient(135deg, #5c0018, #8b0000);
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.5);
+}
+body.electric-theme .time-slot.booked.paid {
+    background: linear-gradient(135deg, #4d0011, #ff1744);
+}
+body.electric-theme .time-slot.booked.anniversaire {
+    background: linear-gradient(135deg, #3a0026, #8b004d);
+}
+body.electric-theme .time-slot.booked.groupe {
+    background: linear-gradient(135deg, #5c0018, #b3001b);
+}
+body.electric-theme .time-slot.closed,
+body.electric-theme .time-slot.auto-closed {
+    background: #200005;
+    color: #a05a5a;
+}
+body.electric-theme .time-slot:not(.booked):not(.closed):not(.auto-closed):hover {
+    background: linear-gradient(135deg, #4d0011, #ff1744);
+    border-left-color: #ff1744;
+}
+
+body.electric-theme .crm-alert-item {
+    background: linear-gradient(135deg, #1a0004, #3a000c);
+}
+
+body.electric-theme .bd-date-separator {
+    color: #fff;
+    border-bottom-color: #ff1744;
+}
+
+body.electric-theme button {
+    box-shadow: 0 0 8px rgba(255, 23, 68, 0.3);
+}
+
+/* === Easter egg : thème "bleu électrique" (clic caché sur le "G" du titre) === */
+body.electric-blue-theme {
+    background: linear-gradient(135deg, #000814, #003566, #0077ff, #001233);
+    background-size: 400% 400%;
+    animation: electricShift 8s ease infinite;
+    color: #d6f0ff;
+}
+
+body.electric-blue-theme h1,
+body.electric-blue-theme h2,
+body.electric-blue-theme h3,
+body.electric-blue-theme h4,
+body.electric-blue-theme h5,
+body.electric-blue-theme label {
+    color: #fff;
+    text-shadow: 0 0 10px #00b8ff, 0 0 20px #0077ff;
+}
+
+body.electric-blue-theme a {
+    color: #4fc3f7;
+}
+
+body.electric-blue-theme .room,
+body.electric-blue-theme .modal-content,
+body.electric-blue-theme .birthday-card,
+body.electric-blue-theme .birthday-form-container,
+body.electric-blue-theme .notes-panel-content,
+body.electric-blue-theme .crm-alert-panel,
+body.electric-blue-theme .bd-mini-card,
+body.electric-blue-theme .queue-item,
+body.electric-blue-theme .counter,
+body.electric-blue-theme .calendar-container {
+    background: linear-gradient(145deg, #00101f, #003366);
+    color: #d6f0ff;
+    border-color: #00b8ff;
+    box-shadow: 0 0 18px rgba(0, 184, 255, 0.35);
+}
+
+body.electric-blue-theme .group-item-card {
+    background: linear-gradient(145deg, #00101f, #003366) !important;
+    color: #d6f0ff;
+    border-color: #00b8ff;
+}
+
+body.electric-blue-theme .room h3,
+body.electric-blue-theme .view-toggle-btn,
+body.electric-blue-theme .counter-display,
+body.electric-blue-theme .group-item-card h5 {
+    background: linear-gradient(135deg, #00b8ff, #003566);
+    color: #fff;
+}
+
+body.electric-blue-theme .view-toggle-btn.active {
+    background: linear-gradient(135deg, #29d1ff, #0051b3);
+    box-shadow: 0 0 12px #00b8ff;
+}
+
+body.electric-blue-theme .group-act-badge {
+    background: #003366;
+    color: #b3e0ff;
+}
+
+body.electric-blue-theme .birthday-formula {
+    background: linear-gradient(135deg, #003366, #0059b3);
+    color: #d6f0ff;
+}
+body.electric-blue-theme .checklist-container {
+    background-color: #00101f;
+}
+body.electric-blue-theme .bd-count-controls {
+    color: #b3e0ff;
+}
+body.electric-blue-theme .bd-count-controls span[style*="color"] {
+    color: #4fc3f7 !important;
+}
+
+body.electric-blue-theme input,
+body.electric-blue-theme select,
+body.electric-blue-theme textarea {
+    background-color: #001b33;
+    color: #d6f0ff;
+    border-color: #00b8ff;
+}
+
+body.electric-blue-theme .time-slot {
+    background: linear-gradient(135deg, #000d1a, #002347);
+    color: #d6f0ff;
+}
+body.electric-blue-theme .time-slot-info {
+    color: #b3e0ff;
+}
+body.electric-blue-theme .time-slot.booked {
+    background: linear-gradient(135deg, #003d80, #0059b3);
+    box-shadow: 0 0 10px rgba(0, 184, 255, 0.5);
+}
+body.electric-blue-theme .time-slot.booked.paid {
+    background: linear-gradient(135deg, #003366, #00b8ff);
+}
+body.electric-blue-theme .time-slot.booked.anniversaire {
+    background: linear-gradient(135deg, #001a4d, #004d99);
+}
+body.electric-blue-theme .time-slot.booked.groupe {
+    background: linear-gradient(135deg, #002e5c, #0073e6);
+}
+body.electric-blue-theme .time-slot.closed,
+body.electric-blue-theme .time-slot.auto-closed {
+    background: #00101f;
+    color: #5a8ca0;
+}
+body.electric-blue-theme .time-slot:not(.booked):not(.closed):not(.auto-closed):hover {
+    background: linear-gradient(135deg, #003366, #00b8ff);
+    border-left-color: #00b8ff;
+}
+
+body.electric-blue-theme .crm-alert-item {
+    background: linear-gradient(135deg, #000d1a, #002347);
+}
+
+body.electric-blue-theme .bd-date-separator {
+    color: #fff;
+    border-bottom-color: #00b8ff;
+}
+
+body.electric-blue-theme button {
+    box-shadow: 0 0 8px rgba(0, 184, 255, 0.3);
+}
+
+/* === Easter egg : thème "vert" (clic caché sur le "R" du titre) === */
+body.green-theme {
+    background: linear-gradient(135deg, #001a08, #00381a, #00c853, #00220a);
+    background-size: 400% 400%;
+    animation: electricShift 8s ease infinite;
+    color: #d9ffe6;
+}
+
+body.green-theme h1,
+body.green-theme h2,
+body.green-theme h3,
+body.green-theme h4,
+body.green-theme h5,
+body.green-theme label {
+    color: #fff;
+    text-shadow: 0 0 10px #00e676, 0 0 20px #00c853;
+}
+
+body.green-theme a {
+    color: #69f0ae;
+}
+
+body.green-theme .room,
+body.green-theme .modal-content,
+body.green-theme .birthday-card,
+body.green-theme .birthday-form-container,
+body.green-theme .notes-panel-content,
+body.green-theme .crm-alert-panel,
+body.green-theme .bd-mini-card,
+body.green-theme .queue-item,
+body.green-theme .counter,
+body.green-theme .calendar-container {
+    background: linear-gradient(145deg, #001a08, #00331a);
+    color: #d9ffe6;
+    border-color: #00e676;
+    box-shadow: 0 0 18px rgba(0, 230, 118, 0.35);
+}
+
+body.green-theme .group-item-card {
+    background: linear-gradient(145deg, #001a08, #00331a) !important;
+    color: #d9ffe6;
+    border-color: #00e676;
+}
+
+body.green-theme .room h3,
+body.green-theme .view-toggle-btn,
+body.green-theme .counter-display,
+body.green-theme .group-item-card h5 {
+    background: linear-gradient(135deg, #00e676, #00381a);
+    color: #fff;
+}
+
+body.green-theme .view-toggle-btn.active {
+    background: linear-gradient(135deg, #69f0ae, #00701a);
+    box-shadow: 0 0 12px #00e676;
+}
+
+body.green-theme .group-act-badge {
+    background: #00331a;
+    color: #b3ffcc;
+}
+
+body.green-theme .birthday-formula {
+    background: linear-gradient(135deg, #00331a, #00592b);
+    color: #d9ffe6;
+}
+body.green-theme .checklist-container {
+    background-color: #001a08;
+}
+body.green-theme .bd-count-controls {
+    color: #b3ffcc;
+}
+body.green-theme .bd-count-controls span[style*="color"] {
+    color: #69f0ae !important;
+}
+
+body.green-theme input,
+body.green-theme select,
+body.green-theme textarea {
+    background-color: #002611;
+    color: #d9ffe6;
+    border-color: #00e676;
+}
+
+body.green-theme .time-slot {
+    background: linear-gradient(135deg, #001005, #002514);
+    color: #d9ffe6;
+}
+body.green-theme .time-slot-info {
+    color: #b3ffcc;
+}
+body.green-theme .time-slot.booked {
+    background: linear-gradient(135deg, #00401f, #00592b);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+}
+body.green-theme .time-slot.booked.paid {
+    background: linear-gradient(135deg, #00331a, #00e676);
+}
+body.green-theme .time-slot.booked.anniversaire {
+    background: linear-gradient(135deg, #001a33, #004d66);
+}
+body.green-theme .time-slot.booked.groupe {
+    background: linear-gradient(135deg, #1a3300, #4d7300);
+}
+body.green-theme .time-slot.closed,
+body.green-theme .time-slot.auto-closed {
+    background: #001a08;
+    color: #5aa07a;
+}
+body.green-theme .time-slot:not(.booked):not(.closed):not(.auto-closed):hover {
+    background: linear-gradient(135deg, #00331a, #00e676);
+    border-left-color: #00e676;
+}
+
+body.green-theme .crm-alert-item {
+    background: linear-gradient(135deg, #001005, #002514);
+}
+
+body.green-theme .bd-date-separator {
+    color: #fff;
+    border-bottom-color: #00e676;
+}
+
+body.green-theme button {
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.3);
+}
+
+/* Nom de l'enfant sur la fiche anniversaire: chaque formule fixe sa propre couleur foncée
+   (bleu/vert/rouge...) pensée pour un fond blanc -> illisible sur un fond déjà coloré/sombre.
+   !important nécessaire pour battre ces règles très spécifiques (jusqu'à 4 classes). */
+body.dark-theme .birthday-header h3,
+body.electric-theme .birthday-header h3,
+body.electric-blue-theme .birthday-header h3,
+body.green-theme .birthday-header h3 {
+    color: #fff !important;
+}
+
+/* === Planning Nettoyage (leaderboard, primes, tableau hebdo) — jamais couvert jusqu'ici === */
+body.dark-theme .cleaning-table,
+body.electric-theme .cleaning-table,
+body.electric-blue-theme .cleaning-table,
+body.green-theme .cleaning-table {
+    background-color: #1e1e1e;
+}
+body.dark-theme .cleaning-table th,
+body.dark-theme .cleaning-table td,
+body.electric-theme .cleaning-table th,
+body.electric-theme .cleaning-table td,
+body.electric-blue-theme .cleaning-table th,
+body.electric-blue-theme .cleaning-table td,
+body.green-theme .cleaning-table th,
+body.green-theme .cleaning-table td {
+    border-color: #3a3a3e;
+    color: #e4e4e4;
+}
+body.dark-theme .cleaning-cell:hover,
+body.electric-theme .cleaning-cell:hover,
+body.electric-blue-theme .cleaning-cell:hover,
+body.green-theme .cleaning-cell:hover {
+    background-color: #2a2a2e;
+}
+
+body.dark-theme .cleaning-category {
+    background-color: #2a2a2e;
+    color: #f0f0f0;
+}
+body.electric-theme .cleaning-category {
+    background: linear-gradient(135deg, #4d0011, #200005);
+    color: #fff;
+}
+body.electric-blue-theme .cleaning-category {
+    background: linear-gradient(135deg, #003566, #00101f);
+    color: #fff;
+}
+body.green-theme .cleaning-category {
+    background: linear-gradient(135deg, #00381a, #001a08);
+    color: #fff;
+}
+
+.child-name-highlight {
+    font-size: 1.15em;
+    font-weight: bold;
+}
+
+.crm-badge {
+    display: inline-block;
+    font-size: 0.7em;
+    background: #2196f3;
+    color: #fff;
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+    vertical-align: middle;
+}
+
+.notes-panel-container {
+    position: fixed;
+    top: 75%; 
+    transform: translateY(-50%);
+    z-index: 998;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-notes-btn {
+    display: none; /* On cache le bouton toggle, plus besoin car fixe */
+}
+
+.notes-panel-content {
+    width: 280px;
+    height: 350px;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+}
+
+/* Spécificités pour le panneau de DROITE (Billard) */
+#notepad-container {
+    right: 20px; /* Panneau directement visible et décollé du bord */
+}
+
+#notepad-container .notes-panel-content {
+    height: 260px; /* réduit vs les 350px par défaut, pour laisser de la place au bouton alerte CRM en dessous */
+}
+
+/* Spécificités pour le panneau de GAUCHE (Notes/Groupes) */
+.notes-panel-container.left {
+    left: 20px;
+    flex-direction: row-reverse;
+}
+
+/* Bouton de vérification de minuit : juste sous le panneau Groupes/Pistes, clignote tant que non traité */
+#midnight-verification-btn {
+    position: fixed;
+    left: 20px;
+    top: calc(75% + 190px);
+    z-index: 997;
+    width: 280px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e74c3c;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: blink 1.2s infinite;
+}
+#midnight-verification-btn:hover {
+    animation-play-state: paused;
+    opacity: 1;
+}
+
+/* NOUVEAU: Styles pour la file d'attente Billard et les cartes Groupes */
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #3498db;
+    font-size: 0.9em;
+}
+.queue-item.billard-item { border-left-color: #f39c12; }
+
+.check-btn {
+    background: none;
+    border: 1px solid #2ecc71;
+    color: #2ecc71;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+.check-btn:hover { background: #2ecc71; color: white; }
+
+.group-item-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-size: 0.85em;
+    position: relative;
+}
+.group-item-card h5 { margin: 0 0 5px 0; color: #2c3e50; font-size: 1.1em; display: flex; justify-content: space-between; align-items: center; }
+.group-act-badge { display: inline-block; background: #ecf0f1; color: #7f8c8d; padding: 2px 6px; border-radius: 10px; font-size: 0.8em; margin: 2px 2px 0 0; }
+.group-ok-badge { color: #27ae60; font-weight: bold; font-size: 0.9em; margin-left: 5px; }
+
+
+.time-slot:not(.booked):not(.closed):not(.auto-closed):hover {
+    background-color: #d4edda; /* Vert pastel, comme la cible de glisser-déposer */
+    cursor: pointer;
+    border-left-color: #28a745;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    width: auto;
+    flex-shrink: 0; /* Empêche le rétrécissement dans un conteneur flex */
+}
+
+.view-toggle-container {
+    display: flex;
+    margin-bottom: 0; /* On enlève la marge du bas pour coller au formulaire */
+    border-radius: 8px 8px 0 0; /* On arrondit uniquement les coins supérieurs */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Pour que le radius s'applique aux enfants */
+}
+
+.view-toggle-btn {
+    flex: 1;
+    padding: 7px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: none;
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border-top: 3px solid transparent; /* On déplace la bordure transparente en haut */
+    border-bottom: none; /* On supprime celle du bas */
+}
+
+.view-toggle-btn:not(.active):hover {
+    background-color: #e9ecef;
+}
+
+.view-toggle-btn.active {
+    background-color: #ffffff;
+    color: #e12421;
+    border-top: 3px solid #e12421; /* La bordure active passe en haut */
+    border-bottom: none; /* On s'assure qu'il n'y a rien en bas */
+}
+
+.view-toggle-container.sticky {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%; /* Largeur réduite comme demandé */
+    max-width: 600px; /* On ajoute une largeur max pour les grands écrans */
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 0 0 8px 8px; /* On arrondit les coins inférieurs */
+}
+
+/* Espace réservé pour éviter que le contenu ne saute brusquement sous les boutons */
+.sticky-placeholder {
+    display: none; /* Caché par défaut */
+}
+.sticky-placeholder.active {
+    display: block; /* Devient visible pour occuper l'espace */
+}
+
+.continuation-indicator {
+    text-align: center;
+    font-size: 2.2em;
+    line-height: 1.2;
+    color: #333;
+    opacity: 0.8;
+}
+
+.view-toggle-container.sticky .view-toggle-btn.active {
+    border-top: 3px solid transparent; /* On enlève la bordure du haut */
+    border-bottom: 3px solid #e12421; /* On remet la bordure active en bas */
+}
+
+.counters-containerDisplay.sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 998;
+    pointer-events: none; /* TRÈS IMPORTANT */
+
+    /* On retire le style visuel du parent */
+    background-color: transparent; 
+    box-shadow: none;
+    padding: 0;
+}
+
+/* 2. On définit un style commun pour TOUS les compteurs en mode sticky.
+  'pointer-events: auto' les rend à nouveau cliquables.
+*/
+.counters-containerDisplay.sticky .counter {
+    position: fixed; /* Chaque compteur est positionné par rapport à la fenêtre */
+    z-index: 999;
+    width: 280px; /* Largeur fixe pour bien se loger dans la marge */
+    flex: none; /* On annule le 'flex: 1' du mode normal */
+    pointer-events: auto; /* On réactive les clics sur les compteurs */
+}
+
+/* 3. On positionne chaque compteur individuellement. ✨
+*/
+
+/* -- Compteurs de GAUCHE -- */
+.counters-containerDisplay.sticky .counter#counter-1,
+.counters-containerDisplay.sticky .counter#counter-1-anniv {
+    top:20px;
+    left: 20px; /* Marge de gauche */
+}
+
+.counters-containerDisplay.sticky .counter#counter-2,
+.counters-containerDisplay.sticky .counter#counter-2-anniv {
+    top: 290px; /* Sous le premier compteur (240px de haut + 15px padding + 15px marge) */
+    left: 20px;
+}
+
+
+/* -- Compteurs de DROITE -- */
+.counters-containerDisplay.sticky .counter#counter-3,
+.counters-containerDisplay.sticky .counter#counter-3-anniv {
+    top:20px;
+    right: 20px; /* Marge de droite */
+}
+
+.counters-containerDisplay.sticky .counter#counter-4,
+.counters-containerDisplay.sticky .counter#counter-4-anniv {
+    top: 290px; /* Sous le troisième compteur */
+    right: 20px;
+}
+
+
+/* Le placeholder ne change pas, il continue de jouer son rôle parfaitement */
+.counters-sticky-placeholder {
+    display: none;
+}
+.counters-sticky-placeholder.active {
+    display: block;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px; /* Espace avant les boutons de vue */
+}
+.main-header > button {
+    margin: 0; /* les boutons ajoutés en JS (PiP, chrono) n'ont plus besoin de marge manuelle, gap s'en charge */
+}
+
+/* Style simple pour le bouton de déconnexion */
+#logout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#logout-btn:hover {
+    background-color: #c0392b;
+}
+#user-list-container {
+    margin-top: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.user-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.user-info {
+    font-size: 14px;
+}
+
+.user-info span {
+    display: block;
+    color: #666;
+    font-size: 12px;
+}
+
+.user-role-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.user-delete-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.user-delete-btn:hover {
+    background-color: #c0392b;
+}
+#custom-alert-modal {
+    z-index: 3000 !important; /* On force une valeur très haute pour passer au-dessus de tout */
+}
+#mobile-container, .mobile-nav {
+    display: none;
+}
+
+/* --- VUE ANNIVERSAIRES --- */
+
+.birthday-form-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    position: relative; /* Important pour positionner la flèche */
+    transition: all 0.3s ease;
+}
+
+.toggle-arrow {
+    position: absolute;
+    top: 20px;     /* Alignement avec le titre H2 */
+    right: 20px;   /* Collé à droite */
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: transform 0.3s ease; /* Animation fluide de rotation */
+    padding: 0;
+    line-height: 1;
+}
+
+.toggle-arrow:hover {
+    color: #3498db;
+    transform: scale(1.1);
+}
+
+/* --- ÉTAT FERMÉ (COLLAPSED) --- */
+
+/* 1. On cache le formulaire quand le conteneur a la classe 'collapsed' */
+.birthday-form-container.collapsed form {
+    display: none;
+}
+
+/* 2. On fait tourner la flèche quand c'est fermé (-90deg ou 180deg selon préférence) */
+.birthday-form-container.collapsed .toggle-arrow {
+    transform: rotate(-90deg); /* La flèche pointe vers la gauche */
+}
+
+.birthdays-grid {
+    display: grid;
+    /* Mobile : 1 colonne par défaut */
+    grid-template-columns: 1fr; 
+    gap: 15px;
+}
+
+/* Tablette : 2 colonnes */
+@media (min-width: 768px) {
+    .birthdays-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Ordinateur (Grand écran) : 4 colonnes (25% chacune) */
+@media (min-width: 1200px) {
+    .birthdays-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.bd-date-separator {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin: 10px 0 0 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #3498db;
+    color: #2c3e50;
+}
+
+.bd-donut-count {
+    font-size: 0.6em;
+    font-weight: normal;
+    color: #7f8c8d;
+    margin-left: 10px;
+}
+
+.birthday-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-top-width: 4px; /* On garde l'épaisseur */
+    border-top-style: solid;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.birthday-card .birthday-header h3 {
+    color: #2c3e50; /* Couleur par défaut (Non arrivé) */
+    transition: color 0.3s ease;
+}
+
+/* Bowling Enfant -> Bleu */
+.birthday-card.formula-bowling_enfant {
+    border-top-color: #3498db; 
+}
+.birthday-card.formula-bowling_enfant.arrived .birthday-header h3 {
+    color: #2980b9;
+}
+
+/* Bowling Jeune -> Vert */
+.birthday-card.formula-bowling_jeune {
+    border-top-color: #2ecc71;
+}
+.birthday-card.formula-bowling_jeune.arrived .birthday-header h3 {
+    color: #27ae60;
+}
+
+/* Bowling + Laser -> Orange */
+.birthday-card.formula-bowling_laser {
+    border-top-color: #e62222;
+}
+.birthday-card.formula-bowling_laser.arrived .birthday-header h3 {
+    color: #d41d10;
+}
+
+/* Laser Jeune -> Rouge (ou le violet original si tu préfères) */
+.birthday-card.formula-laser_jeune {
+    border-top-color: #f1ff2d;
+}
+.birthday-card.formula-laser_jeune.arrived .birthday-header h3 {
+    color: #cbd62c;
+}
+
+.birthday-card.formula-quiz {
+    border-top-color: #d35400; 
+}
+.birthday-card.formula-quiz.arrived .birthday-header h3 {
+    color: #e67e22;
+}
+
+.birthday-header {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.birthday-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: #8e44ad;
+}
+
+.birthday-info {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.birthday-formula {
+    background-color: #f3e5f5;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.checklist-container {
+    background: #fafafa;
+    padding: 5px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.9em;
+    margin: 3px 0;
+}
+
+.checklist-item input {
+    width: auto;
+    margin-right: 8px;
+}
+
+.checklist-item.checked {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.launch-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: auto;
+}
+
+.launch-btn {
+    flex: 1;
+    padding: 5px;
+    font-size: 0.8em;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: white;
+}
+
+.launch-btn.bas { background-color: #3498db; }
+.launch-btn.haut { background-color: #e67e22; }
+/* --- STYLE BOUTON SUPPRIMER (REDESIGN) --- */
+/* --- 1. STYLE PAR DÉFAUT (Comme avant : discret) --- */
+.delete-card-btn {
+    background: transparent;
+    color: #999;
+    border: 1px solid #ddd;
+    width: 100%;
+    margin-top: 5px;
+    font-size: 0.8em;
+    cursor: pointer;
+    border-radius: 4px; /* Un petit radius par défaut pour faire propre */
+    padding: 5px;
+    transition: all 0.3s ease;
+}
+
+.delete-card-btn:hover {
+    background: #eee;
+    color: #e74c3c;
+}
+
+/* --- 2. STYLE "CARTE FINIE" (Le beau bouton rouge) --- */
+/* Ce style ne s'applique QUE si la carte a la classe .finished */
+
+.birthday-card.finished .delete-card-btn {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b); /* Joli dégradé rouge */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 15px;
+    margin-top: 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px rgba(255, 75, 43, 0.3); /* Ombre rouge portée */
+}
+
+/* Hover spécifique pour le bouton rouge */
+.birthday-card.finished .delete-card-btn:hover {
+    background: linear-gradient(135deg, #ff4b2b, #ff416c); /* Inverse le dégradé */
+    transform: translateY(-2px); /* Monte légèrement */
+    box-shadow: 0 6px 12px rgba(255, 75, 43, 0.4);
+    color: white; /* On force le blanc pour ne pas qu'il devienne rouge comme le bouton normal */
+}
+
+.birthday-card.finished .delete-card-btn:active {
+    transform: translateY(0); /* S'enfonce au clic */
+}
+
+/* Styles pour les chronos dans les cartes anniversaire */
+.activity-row {
+    background-color: #f8f9fa;
+    border: 1px solid #eee;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.activity-label {
+    font-size: 0.85em;
+    font-weight: bold;
+    color: #2c3e50;
+    width: 60px; /* Largeur fixe pour alignement */
+}
+
+.timeline-item.pause {
+    border-left: 4px solid #95a5a6;
+}
+
+.activity-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.room-select-mini {
+    padding: 2px;
+    font-size: 0.8em;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    width: 60px;
+}
+
+.timer-btn-mini {
+    padding: 3px 8px;
+    font-size: 0.8em;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: white;
+    background-color: #2ecc71; /* Vert par défaut */
+}
+.timer-btn-mini:hover { background-color: #27ae60; }
+
+.timer-btn-mini.running {
+    background-color: #e74c3c; /* Rouge si ça tourne (pour stop éventuellement, ou juste indicatif) */
+    cursor: default;
+}
+
+.card-timer-display {
+    font-family: monospace;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    min-width: 50px;
+    text-align: right;
+}
+
+.card-timer-display.active {
+    color: #e67e22;
+}
+
+/* On supprime les anciens boutons de lancement globaux */
+.launch-buttons { display: none; }
+
+/* Animation pour l'encaissement */
+@keyframes blinkRed {
+    0% { 
+        background-color: transparent; 
+        color: #333; 
+        border-color: #e74c3c;
+    }
+    50% { 
+        background-color: #ffe6e6; /* Fond rouge très pâle */
+        color: #c0392b; /* Texte rouge foncé */
+        border-color: #c0392b;
+        /* On retire transform: scale et font-weight: bold pour éviter que ça bouge */
+    }
+    100% { 
+        background-color: transparent; 
+        color: #333; 
+        border-color: #e74c3c;
+    }
+}
+
+.checklist-item.blink-alert {
+    animation: blinkRed 1.5s infinite ease-in-out;
+    border: 1px dashed #e74c3c; 
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-weight: bold; /* On met le gras fixe pour éviter le saut */
+    box-sizing: border-box; /* Assure que la bordure ne change pas la taille */
+}
+
+/* --- AJOUTS GESTION PRIX & COMPTEUR ANNIV --- */
+
+.bd-count-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.count-btn {
+    background-color: #ecf0f1;
+    border: 1px solid #bdc3c7;
+    color: #2c3e50;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.2s;
+}
+
+.count-btn:hover {
+    background-color: #bdc3c7;
+}
+
+.toggle-price-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 0 5px;
+    transition: transform 0.2s;
+}
+
+.toggle-price-btn:hover {
+    transform: scale(1.2);
+}
+
+.price-details {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: #e8f8f5;
+    border: 1px solid #a3e4d7;
+    border-radius: 4px;
+    color: #16a085;
+    font-size: 0.95em;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- FRISE CHRONOLOGIQUE MODERNE --- */
+
+#global-timeline-wrapper {
+    background: white;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.timeline-container {
+    position: relative;
+    padding: 20px;
+    overflow-x: auto; /* Permet le scroll horizontal si beaucoup d'activités */
+    white-space: nowrap;
+    min-height: 140px;
+    /* Custom scrollbar style */
+    scrollbar-width: thin;
+    scrollbar-color: #3498db #f0f0f0;
+}
+
+.timeline-container::-webkit-scrollbar {
+    height: 8px;
+}
+.timeline-container::-webkit-scrollbar-thumb {
+    background-color: #3498db;
+    border-radius: 4px;
+}
+
+/* La ligne horizontale centrale */
+.timeline-line {
+    position: absolute;
+    top: 50px; /* Position verticale de la ligne */
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 1;
+}
+
+.timeline-items-container {
+    display: flex;
+    gap: 40px; /* Espace entre les événements */
+    padding: 0 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 140px;
+}
+
+/* Le point sur la ligne */
+.timeline-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #3498db;
+    border: 4px solid white;
+    box-shadow: 0 0 0 2px #3498db;
+    margin-top: 18px; /* Ajusté pour s'aligner sur la ligne (top 50px) */
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+/* Couleurs spécifiques selon l'activité */
+.timeline-item.laser .timeline-marker {
+    background-color: #e74c3c;
+    box-shadow: 0 0 0 2px #e74c3c;
+}
+.timeline-item.bowling .timeline-marker {
+    background-color: #2ecc71;
+    box-shadow: 0 0 0 2px #2ecc71;
+}
+
+/* Moment gâteau : dérivé de la dernière activité de la formule, tant que la case
+   "gâteau" de la fiche n'est pas cochée. Clic sur "Valider" -> checklist.cake = true. */
+.timeline-item.gateau .timeline-marker {
+    background-color: #ff4fa3;
+    box-shadow: 0 0 0 2px #ff4fa3;
+}
+.timeline-item.gateau .timeline-time {
+    font-size: 1.4em;
+}
+.timeline-item.gateau .timeline-desc {
+    color: #ff4fa3;
+    font-weight: bold;
+}
+
+.timeline-time {
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+.timeline-content {
+    background: white;
+    border: 1px solid #eee;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+    white-space: normal; /* Permet au texte de revenir à la ligne dans la bulle */
+}
+
+.timeline-title {
+    font-weight: bold;
+    font-size: 0.95em;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.timeline-desc {
+    font-size: 0.85em;
+    color: #666;
+}
+
+.timeline-countdown {
+    margin-top: 5px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* Animation pulsation pour les temps < 3 min */
+@keyframes timelinePulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(231, 76, 60, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.timeline-item.urgent .timeline-marker {
+    animation: timelinePulse 1.5s infinite;
+    background-color: #e74c3c;
+}
+.timeline-item.urgent .timeline-countdown {
+    color: #e74c3c;
+}
+
+/* --- STYLE POUR LES NOTES --- */
+.notes-toggle {
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: 10px;
+    text-decoration: underline;
+    user-select: none;
+}
+.notes-toggle:hover {
+    color: #333;
+}
+
+.notes-area {
+    width: 100%;
+    box-sizing: border-box; /* Important pour ne pas dépasser la largeur */
+    margin-top: 5px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9em;
+    resize: vertical; /* Hauteur réglable par l'utilisateur */
+    min-height: 60px;
+    background-color: #ffffff; /* Un petit fond jaune type post-it */
+}
+
+/* --- STYLE CARTE TERMINÉE --- */
+.birthday-card.finished {
+    opacity: 0.6;                 /* Rend la carte semi-transparente */
+    transform: scale(0.95);       /* Réduit la taille à 95% */
+    filter: grayscale(100%);      /* Enlève toutes les couleurs (devient gris) */
+    background-color: #f0f0f0;    /* Fond gris clair */
+    border-top-color: #95a5a6 !important; /* Force la bordure supérieure en gris */
+    box-shadow: none;             /* Enlève l'ombre pour l'aplatir */
+    transition: all 0.5s ease;    /* Animation fluide lors du changement d'état */
+    order: 100;                   /* (Optionnel) Place ces cartes à la fin de la grille si vous utilisez Flex/Grid */
+}
+
+/* Au survol d'une carte terminée, on redonne un peu de vie pour qu'elle reste lisible */
+.birthday-card.finished:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+    transform: scale(1);
+    z-index: 10;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+/* --- BOUTON TOUT SUPPRIMER (Apparition dynamique) --- */
+#delete-all-bd-container {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+#delete-all-bd-btn {
+    background: linear-gradient(135deg, #c0392b, #8e44ad); /* Rouge vers Violet */
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4);
+    transition: all 0.3s transform;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#delete-all-bd-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(192, 57, 43, 0.6);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- PLANNING NETTOYAGE --- */
+
+/* Modal plus large */
+#cleaning-modal .modal-content {
+    max-width: 98% !important; /* Prend presque toute la largeur */
+    width: 1400px !important;    /* Force une grande largeur sur grand écran */
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.cleaning-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    table-layout: fixed; /* OBLIGATOIRE pour uniformiser les cases */
+}
+
+.cleaning-table th, .cleaning-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    overflow: hidden;    /* Cache ce qui dépasse si le nom est trop long */
+    white-space: nowrap; /* Empêche le texte d'aller à la ligne (optionnel) */
+    text-overflow: ellipsis; /* Ajoute "..." si ça dépasse */
+}
+
+/* En-tête fixe */
+.cleaning-table thead th {
+    background-color: #2c3e50;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 12px 5px;
+}
+
+/* --- DÉFINITION DES LARGEURS ET STYLES --- */
+
+/* 1. Largeurs définies sur les TH (En-têtes) uniquement */
+/* C'est plus stable que de le mettre sur les TD quand il y a des rowspans */
+.cleaning-table th:nth-child(1) { width: 8%; }
+.cleaning-table th:nth-child(2) { width: 22%; }
+.cleaning-table th:nth-child(n+3) { width: 10%; }
+
+/* 2. STYLE DE LA CATÉGORIE (Cible la classe ajoutée par le JS) */
+.cleaning-category {
+    background-color: #f0f3f5;
+    font-weight: bold;         
+    text-align: left;
+    color: #2c3e50;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    vertical-align: middle;
+    
+    /* NOUVEAU : On autorise le texte à revenir à la ligne */
+    white-space: normal !important; 
+    word-wrap: break-word;
+}
+
+.cleaning-task-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.task-history-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+.task-history-btn:hover {
+    opacity: 1;
+    background: #eef1f2;
+}
+
+.task-last-done {
+    display: block;
+    font-size: 0.75em;
+    color: #95a5a6; /* Gris clair */
+    margin-top: 4px;
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* 3. STYLE DE LA TÂCHE (Cible la classe ajoutée par le JS) */
+.cleaning-task {
+    /* On force le retour à la ligne au lieu des "..." */
+    white-space: normal !important; 
+    text-overflow: clip !important;
+    
+    /* Optimisation pour que ça tienne dans la hauteur existante */
+    line-height: 1.1;       /* Interligne plus serré pour gagner de la place */
+    font-size: 0.85em;      /* Police légèrement réduite (optionnel, mais aide beaucoup) */
+    padding: 2px 10px;      /* On réduit les marges verticales pour coller le texte */
+    
+    text-align: left;
+    font-weight: 500; 
+    background-color: white; 
+    vertical-align: middle; /* Centre le bloc de texte verticalement dans la case */
+}
+
+/* 4. Cellules cliquables (Jours) */
+.cleaning-cell {
+    position: relative; /* Nécessaire pour positionner les noms */
+    padding: 0 !important; /* On enlève le padding pour coller aux bords */
+    height: 50px; /* Un peu plus haut pour que ça respire */
+    vertical-align: middle;
+}
+
+/* Prénom en Haut à Gauche */
+.name-top-left {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: black;
+    z-index: 2;
+    text-shadow: 0 0 2px rgba(255,255,255,0.8); /* Petit contour blanc pour lisibilité */
+}
+
+/* Prénom en Bas à Droite */
+.name-bottom-right {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: black;
+    z-index: 2;
+    text-shadow: 0 0 2px rgba(255,255,255,0.8);
+}
+
+/* Centre le texte quand il est tout seul */
+.name-single {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* 2. Style semaine verrouillée */
+.locked-week .cleaning-cell {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    background-color: #ecf0f1; /* Gris */
+}
+
+.locked-week .cleaning-cell:hover {
+    box-shadow: none;
+}
+
+/* 3. Style Leaderboard */
+.leaderboard-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 1.1em;
+}
+
+.leaderboard-row:first-child {
+    background-color: #fff9c4; /* Or pour le 1er */
+    font-weight: bold;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #fbc02d;
+}
+
+.score-badge {
+    background-color: #2c3e50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.9em;
+}
+
+.cleaning-cell:hover {
+    background-color: #eee;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+}
+
+/* 5. Couleurs employés */
+.cleaning-cell.bg-yellow, .cleaner-btn[data-color="yellow"] {
+    background-color: #fff176; /* Jaune plus soutenu */
+    border-color: #fdd835;
+    color: black;
+}
+.cleaning-cell.bg-blue, .cleaner-btn[data-color="blue"] {
+    background-color: #64b5f6; /* Bleu plus soutenu */
+    border-color: #1e88e5;
+    color: black;
+}
+.cleaning-cell.bg-red, .cleaner-btn[data-color="red"] {
+    background-color: #e57373; /* Rouge plus soutenu */
+    border-color: #d32f2f;
+    color: black;
+}
+
+/* --- BARRE D'OUTILS ET BOUTONS --- */
+.cleaning-toolbar {
+    padding: 15px;
+    background-color: #ecf0f1;
+    border-top: 1px solid #bdc3c7;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espace entre "Qui nettoie ?" et les boutons */
+}
+
+/* Style de base du bouton */
+.cleaner-btn {
+    padding: 8px 16px;
+    border: 3px solid transparent; /* Bordure transparente par défaut pour éviter le décalage */
+    border-radius: 25px; /* Forme bien arrondie */
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.95em;
+    opacity: 0.6; /* Légèrement transparent quand non sélectionné */
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Animation avec petit effet "rebond" */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Au survol (souris dessus) */
+.cleaner-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px); /* Monte légèrement */
+}
+
+/* --- L'EFFET ACTIF (SÉLECTIONNÉ) --- */
+.cleaner-btn.active {
+    opacity: 1;             /* Pleinement opaque */
+    transform: scale(1.15); /* Grossit de 15% */
+    border-color: #2c3e50;  /* Bordure foncée visible */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Ombre portée plus forte */
+    z-index: 1; /* Passe au-dessus des autres si ils se touchent */
+}
+
+/* Ajustement spécifique pour la gomme */
+.cleaner-btn.eraser {
+    background-color: #000000;
+    border: 1px solid #bdc3c7; /* Bordure fine grise par défaut */
+}
+
+/* Quand la gomme est active */
+.cleaner-btn.eraser.active {
+    background-color: #414141;
+    border: 3px solid #7f8c8d; /* Bordure grise épaisse */
+    border-color: #2c3e50;
+}
+
+/* --- LEADERBOARD & BADGES --- */
+
+/* Onglets du leaderboard */
+.tab-btn {
+    background: #ecf0f1;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #7f8c8d;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background: #2c3e50;
+    color: #f1c40f; /* Jaune doré */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Style Global (Prestigieux) */
+.global-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #eee;
+    font-weight: bold;
+}
+
+/* Le 1er du classement global */
+.global-row.rank-1 {
+    background: linear-gradient(135deg, #fff9c4 0%, #fff 100%);
+    border: 2px solid #fbc02d;
+    color: #f39c12;
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
+}
+
+.global-row.rank-2 { border-left: 5px solid #bdc3c7; }
+.global-row.rank-3 { border-left: 5px solid #cd7f32; }
+
+/* Le Badge GOAT dans le tableau */
+.goat-badge {
+    position: absolute;
+    font-size: 1.2em; /* Visible mais pas énorme */
+    z-index: 10;
+    filter: drop-shadow(0 0 2px white);
+}
+
+/* Positionnement du badge selon la disposition */
+/* Cas 1 : Solo (Badge à côté du nom) */
+.cleaning-cell .name-single .goat-badge {
+    margin-left: 5px;
+    position: static; 
+}
+
+/* Cas 2 : Duo (Badge dans les coins opposés) */
+/* Si c'est le joueur en haut à gauche -> Badge un peu à droite du nom */
+.cleaning-cell .name-top-left .goat-badge {
+    position: absolute;
+    top: 0px;
+    left: 100%; /* Juste après le nom */
+    white-space: nowrap;
+}
+
+/* Si c'est le joueur en bas à droite -> Badge un peu à gauche du nom */
+.cleaning-cell .name-bottom-right .goat-badge {
+    position: absolute;
+    bottom: 0px;
+    right: 100%; /* Juste avant le nom */
+    white-space: nowrap;
+}
+
+/* --- STYLE HALL OF FAME --- */
+
+.hof-title {
+    font-size: 1.8em;
+    margin-top: 0;
+    text-align: center;
+    color: #2c3e50; /* Couleur par défaut pour les émojis si besoin */
+}
+
+/* Le dégradé doré s'applique UNIQUEMENT au texte dans le span */
+.hof-title span {
+    background: linear-gradient(to bottom, #ffce0a, #d4b01c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    
+    /* L'animation d'aura */
+    animation: goldPulse 2s infinite ease-in-out;
+}
+
+/* L'animation qui fait "pulser" la lueur autour du texte */
+@keyframes goldPulse {
+    0% {
+        filter: drop-shadow(0 0 2px rgba(238, 192, 10, 0.493));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 10px rgba(241, 79, 15, 0.685)); /* L'aura grandit */
+        transform: scale(1.03); /* Le texte grossit à peine */
+    }
+    100% {
+        filter: drop-shadow(0 0 2px rgba(238, 192, 10, 0.493));
+        transform: scale(1);
+    }
+}
+
+/* --- TÂCHES ADDITIONNELLES --- */
+
+.additional-col {
+    flex: 1;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.additional-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+    color: #333; /* Texte sombre par défaut */
+}
+
+/* Couleurs spécifiques pour les en-têtes */
+.header-yellow { background-color: #fff59d; border: 1px solid #fbc02d; }
+.header-blue { background-color: #90caf9; border: 1px solid #1976d2; }
+.header-red { background-color: #ef9a9a; border: 1px solid #d32f2f; }
+
+.add-task-input-group {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.add-task-input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.add-task-btn {
+    padding: 5px 10px;
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.add-task-btn:hover { background-color: #219150; }
+
+.additional-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex: 1;
+}
+
+.additional-item {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 5px;
+    font-size: 0.85em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.additional-item:last-child { border-bottom: none; }
+
+.delete-task-btn {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 0 5px;
+}
+
+.delete-task-btn:hover { transform: scale(1.2); }
+
+/* --- GESTION NETTOYEURS --- */
+
+.cleaner-mgmt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+.cleaner-mgmt-row:last-child {
+    border-bottom: none;
+}
+
+.cleaner-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.delete-cleaner-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.delete-cleaner-btn:hover {
+    background: #c0392b;
+}
+
+/* Modification pour supporter les couleurs dynamiques (inline style) */
+.cleaning-cell {
+    /* On garde les styles de base */
+    transition: background-color 0.2s;
+}
+
+.cleaner-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-cleaner-btn {
+    background: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.edit-cleaner-btn:hover { background: #d35400; }
+
+.save-cleaner-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+.cancel-cleaner-btn {
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+}
+
+/* --- STYLES ADMIN TÂCHES --- */
+
+.admin-task-group {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.admin-task-cat-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #ddd;
+}
+
+.edit-cat-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #2c3e50;
+    border: 1px solid transparent;
+    background: transparent;
+}
+
+.edit-cat-name:focus {
+    border-color: #3498db;
+    background: white;
+}
+
+.admin-task-row {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 5px;
+    align-items: center;
+}
+
+.edit-task-name {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #eee;
+    font-size: 0.9em;
+}
+
+.delete-task-btn-admin {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.delete-cat-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.add-task-btn-admin {
+    margin-top: 5px;
+    background: none;
+    border: 1px dashed #aaa;
+    color: #666;
+    width: 100%;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.add-task-btn-admin:hover {
+    background: #eee;
+    color: #333;
+}
+
+/* --- STYLE DES LOGS --- */
+.log-entry {
+    background: white;
+    border-left: 4px solid #ccc;
+    padding: 10px;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.log-entry.add { border-left-color: #2ecc71; } /* Vert pour ajout */
+.log-entry.remove { border-left-color: #e74c3c; } /* Rouge pour suppression */
+
+.log-date {
+    font-size: 0.8em;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.log-content {
+    color: #2c3e50;
+}
+
+.log-user {
+    font-weight: bold;
+    color: #3498db;
+}
+
+/* Animation de clignotement rouge discret */
+@keyframes urgentPulse {
+    0% { background-color: white; box-shadow: inset 0 0 0 0 rgba(231, 76, 60, 0); }
+    50% { background-color: #fff5f5; box-shadow: inset 0 0 0 2px rgba(231, 76, 60, 0.5); }
+    100% { background-color: white; box-shadow: inset 0 0 0 0 rgba(231, 76, 60, 0); }
+}
+
+.cleaning-cell.bonus-active {
+    /* Garde ton animation existante urgentPulse */
+    animation: urgentPulse 2s infinite ease-in-out;
+    
+    /* Centrage parfait */
+    display: flex !important; /* Important pour écraser le display table-cell si besoin */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.bonus-message-container {
+    pointer-events: none; /* Le clic passe au travers pour valider la case */
+}
+
+.bonus-big-text {
+    font-size: 1.8em;
+    font-weight: 900;
+    color: #c0392b; /* Rouge foncé */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.bonus-sub-text {
+    font-size: 0.75em;
+    font-style: italic;
+    color: #e74c3c; /* Rouge un peu plus clair */
+    font-weight: bold;
+    margin-top: -2px; /* Rapproche le texte du +1 */
+}
+
+/* On supprime l'ancien style du petit badge s'il existe encore */
+.bonus-badge {
+    display: none;
+}
+
+/* Champ deadline dans l'admin */
+.edit-task-deadline {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #eee;
+    text-align: center;
+    margin-right: 5px;
+    border-radius: 4px;
+}
+
+.bonus-done-indicator {
+    position: absolute;
+    top: 2px;        /* Déborde légèrement en haut */
+    right: 2px;      /* Déborde légèrement à droite */
+    width: 20px;
+    height: 20px;
+    background-color: #e74c3c; /* Rouge */
+    color: white;
+    border-radius: 20%;
+    font-size: 0.75em;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;      /* Au-dessus des noms */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border: 2px solid white; /* Petite bordure blanche pour détacher du fond */
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
+details.log-day-details {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+details.log-day-details summary {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #2c3e50;
+    list-style: none; /* Cache la flèche par défaut sur certains navigateurs */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid transparent;
+    transition: background 0.2s;
+}
+
+details.log-day-details[open] summary {
+    border-bottom: 1px solid #ddd;
+    background-color: #e9ecef;
+}
+
+details.log-day-details summary:hover {
+    background-color: #e2e6ea;
+}
+
+details.log-day-details summary::after {
+    content: '+'; 
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+details.log-day-details[open] summary::after {
+    content: '-';
+}
+
+.log-day-content {
+    padding: 15px;
+    background: #fff;
+}
+
+/* Style pour les rangées d'administration des barèmes */
+.admin-scale-row {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #d35400; /* Orange */
+}
+
+.admin-scale-row input, .admin-scale-row textarea {
+    font-size: 0.9em;
+}
+
+.admin-scale-row input:focus, .admin-scale-row textarea:focus {
+    border-color: #d35400;
+    outline: none;
+}
+
+/* Petit ajustement pour le tableau utilisateur */
+#exceptional-info-modal table th {
+    font-family: 'Orbitron', sans-serif; /* Pour garder le style du site */
+    letter-spacing: 1px;
+}
+
+/* Bouton pour ouvrir le modal d'ajout */
+.add-task-btn-modal {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.add-task-btn-modal:hover {
+    background-color: #219150;
+}
+
+/* Lignes du modal d'ajout */
+.exceptional-option-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    background: white;
+    transition: background 0.2s;
+}
+
+.exceptional-option-row:hover {
+    background-color: #f9f9f9;
+}
+
+.exceptional-label {
+    flex: 1;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.exceptional-points-input {
+    width: 50px;
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #e67e22;
+}
+
+/* Style de l'option "Autre" quand sélectionnée */
+input[type="radio"]:checked + label {
+    color: #d35400;
+}
+
+/* --- NOUVEAU : PLAN DE TABLE --- */
+/* --- NOUVEAU : PLAN DE TABLE --- */
+.table-plan-board {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    /* MODIFICATION ICI : On augmente l'espace vertical entre les rangées */
+    gap: 150px; /* C'était 40px avant */
+}
+
+/* Conteneurs des rangées */
+.plan-row-hautes {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px; /* Espace standard entre les tables */
+    /* Pas de margin-bottom ici, géré par le gap du parent */
+}
+
+.plan-container-milieu {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Aligne T2 avec le bas des banquettes */
+    /* MODIFICATION ICI : On augmente l'espace entre l'arrondi des banquettes et T2 */
+    gap: 90px; /* C'était 20px avant */
+}
+
+.plan-curve-banquettes {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.plan-row-bas {
+    display: flex;
+    justify-content: space-between; /* T1 à gauche, Rab à droite */
+    align-items: flex-start;
+    margin-top:-50px;
+    margin-left:50px;
+}
+
+/* Gestion de l'arrondi des banquettes */
+/* B1 et B6 (Extérieurs) : Rotation plus forte */
+.plan-curve-banquettes .table-shape:nth-child(1) { transform: translateY(-30px) rotate(10deg); }
+/* CORRECTION ICI POUR B6 : Rotation inversée (-10deg) */
+.plan-curve-banquettes .table-shape:nth-child(6) { transform: translateY(-30px) rotate(-10deg); }
+
+/* B2 et B5 (Intérieurs) : Rotation légère */
+.plan-curve-banquettes .table-shape:nth-child(2) { transform: translateY(-10px) rotate(5deg); }
+/* CORRECTION ICI POUR B5 : Rotation inversée (-5deg) */
+.plan-curve-banquettes .table-shape:nth-child(5) { transform: translateY(-10px) rotate(-5deg); }
+
+.plan-curve-banquettes > div:nth-child(1) { transform: translateY(-30px) rotate(10deg); }
+.plan-curve-banquettes > div:nth-child(6) { transform: translateY(-30px) rotate(-10deg); }
+.plan-curve-banquettes > div:nth-child(2) { transform: translateY(-10px) rotate(5deg); }
+.plan-curve-banquettes > div:nth-child(5) { transform: translateY(-10px) rotate(-5deg); }
+
+
+/* Style général des tables */
+.table-shape {
+    border: 2px solid #bdc3c7;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px 5px;
+    min-height: 85px;
+    min-width: 75px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    position: relative; /* Nécessaire pour le z-index lors de la fusion */
+}
+
+.table-shape.banquette { border-radius: 15px; }
+
+.table-shape.occupied {
+    background-color: #3498db;
+    border-color: #2980b9;
+    color: white;
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+.table-shape.merge-right {
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    z-index: 2; 
+    padding-right: 2px;
+    margin-right: 0;
+}
+
+.table-shape.merge-left {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    z-index: 1;
+    padding-left: 2px;
+    /* NOUVEAU : On force la table de gauche à reculer pour annuler le "gap" de 15px et se coller */
+    margin-left: -17px;
+}
+
+/* NOUVEAU : petits boutons ronds sur une table occupée, visibles seulement en mode édition --
+   jusqu'à 3 par case : 🗑️ (haut-gauche, supprimer), ➕ (haut-droite, doubler à droite), 📦
+   (bas, ajouter/retirer une Table Rab) ; et ❌ (case doublée uniquement, retirer juste celle-ci). */
+.table-edit-btn {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 0.75em;
+    line-height: 20px;
+    padding: 0;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.table-edit-btn:hover {
+    background: rgba(0, 0, 0, 0.55);
+    transform: scale(1.1);
+}
+
+.table-edit-btn-delete { top: 2px; left: 2px; background: rgba(192, 57, 43, 0.75); }
+.table-edit-btn-delete:hover { background: rgba(192, 57, 43, 1); }
+
+.table-edit-btn-merge { top: 2px; right: 2px; }
+
+.table-edit-btn-rab { bottom: 2px; left: 50%; transform: translateX(-50%); }
+.table-edit-btn-rab:hover { transform: translateX(-50%) scale(1.1); }
+
+.table-edit-btn-unmerge { top: 2px; right: 2px; background: rgba(192, 57, 43, 0.75); }
+.table-edit-btn-unmerge:hover { background: rgba(192, 57, 43, 1); }
+
+
+/* Typographie à l'intérieur des tables */
+.table-name { font-weight: bold; font-size: 1em; line-height: 1.1; margin-bottom: 4px; }
+.table-details { font-size: 0.85em; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; display: inline-block; margin-bottom: 4px;}
+.table-id-row { font-size:0.75em; margin-top: auto; width: 100%; display: flex; justify-content: center; gap: 5px;}
+.table-id-badge { background:rgba(0,0,0,0.1); padding: 1px 5px; border-radius: 4px; }
+
+/* Bloc stock Rab */
+.rab-status {
+    text-align: right;
+    font-size: 0.9em;
+    color: #7f8c8d;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px dashed #bdc3c7;
+}
+
+/* DANS style_v2.css */
+
+/* Indicateur visuel quand le mode édition est actif */
+.table-plan-editing .table-shape {
+    cursor: grab;
+    border: 2px dashed #9b59b6 !important; /* Bordure violette pour indiquer qu'on peut bouger */
+    animation: pulse-border 2s infinite;
+}
+
+.table-plan-editing .table-shape.occupied:hover {
+    transform: scale(1.05);
+    z-index: 100;
+}
+
+/* Quand on attrape un élément */
+.table-shape.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+/* Quand on survole une zone de dépôt valide */
+.table-shape.drag-over {
+    background-color: #d1f2eb !important;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+@keyframes pulse-border {
+    0% { border-color: #9b59b6; }
+    50% { border-color: #8e44ad; }
+    100% { border-color: #9b59b6; }
+}   
+
+/* --- BOUNTY BOARD (RPG STYLE) --- */
+.bounty-board-bg {
+    background: #5c4033; /* Bois sombre */
+    background-image: repeating-linear-gradient(to right, #4a3225 0px, #4a3225 20px, #5c4033 20px, #5c4033 40px);
+    padding: 40px;
+    border: 15px solid #3e2723;
+    border-radius: 10px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.6);
+    min-height: 400px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+}
+
+.bounty-paper {
+    background: #fdf6e3;
+    width: 160px;
+    height: 190px;
+    padding: 15px;
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.5);
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Courier New', Courier, monospace; /* Style machine à écrire / vieux papier */
+}
+
+.bounty-paper:hover {
+    transform: scale(1.1) rotate(0deg) !important;
+    z-index: 10;
+    box-shadow: 5px 10px 20px rgba(0,0,0,0.6);
+}
+
+/* La punaise */
+.bounty-pin {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle at 30% 30%, #e74c3c, #900000);
+    border-radius: 50%;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.6);
+    z-index: 2;
+}
+
+.bounty-title { 
+    font-weight: 900; 
+    font-size: 1.1em; 
+    text-align: center; 
+    margin-top: 15px; 
+    flex: 1; 
+    color: #2c3e50;
+    text-transform: uppercase;
+}
+
+.bounty-reward { 
+    font-size: 1.3em; 
+    font-weight: bold; 
+    color: #d35400; 
+    text-align: center; 
+    border-top: 2px dashed #bdc3c7; 
+    padding-top: 8px; 
+}
+
+/* Badge de rareté */
+.bounty-tier-badge {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    font-size: 1.2em;
+    z-index: 2;
+}
+
+/* Couleurs RPG par Rang */
+.bounty-paper.tier-S .bounty-tier-badge { background: #f1c40f; color: #fff; border: 2px solid #d35400; text-shadow: 1px 1px 2px #d35400; } /* Légendaire */
+.bounty-paper.tier-A .bounty-tier-badge { background: #9b59b6; color: #fff; border: 2px solid #2c3e50; } /* Épique */
+.bounty-paper.tier-B .bounty-tier-badge { background: #3498db; color: #fff; border: 2px solid #2980b9; } /* Rare */
+.bounty-paper.tier-C .bounty-tier-badge { background: #2ecc71; color: #fff; border: 2px solid #27ae60; } /* Commun */
+
+/* NOUVEAU : Bouton "Note du jour" (à gauche du menu flottant) */
+.day-note-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 90px; /* Juste à gauche du bouton menu (55px + 20px + marge) */
+    z-index: 10000;
+    background-color: #f1c40f;
+    color: #2c3e50;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.day-note-toggle:hover {
+    background-color: #f39c12;
+    transform: scale(1.05);
+}
+
+.day-note-indicator {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    color: #e74c3c;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.day-note-panel {
+    position: fixed;
+    bottom: 85px; /* Au-dessus du bouton */
+    right: 90px;
+    width: 300px;
+    max-width: calc(100vw - 40px);
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 10000;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.day-note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.day-note-header h4 {
+    margin: 0;
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    color: #2c3e50;
+}
+
+.day-note-close {
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 1;
+    color: #999;
+}
+.day-note-close:hover { color: #333; }
+
+#day-note-textarea {
+    width: 100%;
+    min-height: 140px;
+    resize: vertical;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.9em;
+    box-sizing: border-box;
+}
+
+.day-note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+#day-note-status {
+    font-size: 0.8em;
+    color: #27ae60;
+}
+
+@media (max-width: 768px) {
+    .day-note-panel {
+        right: 15px;
+        left: 15px;
+        width: auto;
+        bottom: 85px;
+    }
+}
+
+.floating-menu-container {
+    position: fixed;
+    /* Position en bas à droite pour PC */
+    bottom: 20px !important;
+    top: auto !important;
+    right: 20px !important;
+    z-index: 10000 !important;
+    display: flex;
+    /* Les items s'affichent au-dessus du bouton sur PC */
+    flex-direction: column-reverse; 
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.floating-menu-items {
+    /* Caché par défaut sur PC */
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.floating-menu-toggle {
+    background-color: #2c3e50;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.floating-menu-toggle:hover {
+    background-color: #34495e;
+    transform: scale(1.05);
+}
+
+.floating-menu-items.show {
+    display: flex;
+}
+
+.floating-menu-item {
+    background-color: white;
+    color: #2c3e50;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 10px 18px;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.2s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.floating-menu-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(-3px);
+}
+
+/* Le menu flottant contient aussi un lien (WaiterIO, une page à part) en plus des boutons
+   qui ouvrent des modales -- même look, mais sans le style de lien par défaut du navigateur. */
+a.floating-menu-item {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* NOUVEAU : sous-menu déroulant "Paramètres" à l'intérieur du menu flottant, pour regrouper les
+   réglages utilisés rarement (groupes, utilisateurs, périodes, tarifs, feuille de caisse) sans
+   allonger la liste principale. Replié par défaut, comme le menu flottant lui-même. */
+.floating-menu-submenu-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.floating-menu-submenu-items {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 14px;
+    border-right: 3px solid #dfe6e9;
+    margin-right: 4px;
+}
+
+.floating-menu-submenu-items.show {
+    display: flex;
+}
+
+#groups-management-modal .modal-content {
+    height: 85vh;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#all-groups-list {
+    flex: 1;
+    max-height: none !important; /* Force l'écrasement de la limite de 400px du HTML */
+    overflow-y: auto;
+}
+
+/* --- NOUVEAU : OPTIMISATIONS MOBILES ET MODALES --- */
+
+@media (max-width: 768px) {
+    /* Simplification des modales de création (Réservation / Groupes) */
+    .modal-content {
+        width: 95% !important;
+        margin: 10% auto;
+        padding: 15px;
+        max-height: 85vh; 
+        overflow-y: auto; /* Rend le contenu scrollable */
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .switches-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* NOUVEAU : Affichage forcé en colonne pour le menu mobile et apparition stricte des boutons */
+    .floating-menu-items {
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+        top: 75px !important; /* Juste en dessous du bouton */
+        bottom: auto !important;
+    }
+
+    .floating-menu-items.show {
+        display: flex !important;
+    }
+
+    .floating-menu-item {
+        display: none !important; 
+    }
+
+    #open-groups-modal,
+    #open-mobile-birthdays-modal,
+    #open-waiterio-link {
+        display: block !important;
+        width: 100%;
+        text-align: left;
+    }
+    .modal {
+    z-index: 10001 !important; 
+}
+
+/* NOUVEAU : Conteneur avec retour à la ligne autorisé */
+#groups-modal .form-row > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 10px !important;
+    padding: 8px 0 !important;
+}
+
+/* NOUVEAU : Checkbox à sa taille normale */
+#groups-modal input[type="checkbox"] {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
+
+/* NOUVEAU : Le nom force le reste à passer à la ligne en prenant une grande largeur */
+.group-act-name {
+    flex: 1 1 65% !important;
+    white-space: normal !important;
+    margin: 0 !important;
+}
+
+/* NOUVEAU : Le champ de prix et le bouton + passent en dessous et s'alignent à droite */
+.group-act-price,
+#groups-modal .form-row input[type="number"],
+#groups-modal .form-row button {
+    flex: 0 0 auto !important;
+    margin-left: auto !important; 
+}
+    
+}
+
+@media (min-width: 769px) {
+    .mobile-only-item {
+        display: none !important; /* Cache le bouton liste anniv sur PC */
+    }
+}
+
+/* Style des cartes de la liste d'anniversaire mobile */
+.mobile-bd-card {
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-left: 4px solid #8e44ad;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 0.95em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+/* Monitoring Bar — commandes détectées pendant le polling 30s. Clignote tant que "en attente de
+   paiement" (statut CRM id 6), redevient calme une fois payée (statut relu à chaque poll). */
+.bar-order-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #f8f9fa;
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+.bar-order-item.bar-order-pending {
+    background: #fdf6da;
+    animation: blink 1s infinite;
+}
+/* NOUVEAU : regroupe les 2 blocs d'infos existants (zone/heure et montant/statut) pour que
+   "justify-content: space-between" (repris de l'ancienne règle .bar-order-item) continue à les
+   écarter comme avant, tout en laissant la place au bouton "✕" à droite. */
+.bar-order-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+.bar-order-item .bar-order-amount {
+    font-weight: bold;
+}
+/* NOUVEAU : efface une commande déjà traitée par le staff -- voir dismissBarOrder() dans script_v2.js. */
+.bar-order-dismiss-btn {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #95a5a6;
+    font-size: 1.1em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+.bar-order-dismiss-btn:hover {
+    background: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+}
+
+/* Pistes réservées — panneau Groupes du Jour, onglet "🎳 Pistes réservées" */
+.lanes-hour-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 8px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+.lanes-hour-header:hover {
+    background: #e9ecef;
+}
+.lanes-hour-detail {
+    padding: 4px 10px 4px 20px;
+}
+.lanes-booking-row {
+    font-size: 0.85em;
+    color: #555;
+    padding: 3px 0;
+    border-bottom: 1px dashed #eee;
+}
+.lanes-booking-row:last-child {
+    border-bottom: none;
+}
+
+.mobile-bd-card strong {
+    color: #2c3e50;
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+/* ================================================================== */
+/* === MODALE "💶 Gérer les tarifs" === */
+/* ================================================================== */
+.pricing-modal-content {
+    max-width: 750px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+#pricing-rules-container {
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-right: 6px;
+}
+.pricing-hint {
+    font-size: 0.85em;
+    opacity: 0.75;
+    margin-top: -8px;
+    margin-bottom: 15px;
+}
+.pricing-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+.pricing-tab-btn {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.pricing-tab-btn.active {
+    background-color: #3498db;
+    color: white;
+}
+.pricing-rule-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+.pricing-rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pricing-rule-actions button {
+    margin-left: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+.pricing-context-row {
+    margin-bottom: 8px;
+}
+.pricing-context-label {
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.pricing-context-label select {
+    width: auto;
+    display: inline-block;
+}
+.pricing-days-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.pricing-day-label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: normal;
+    font-size: 0.85em;
+    background-color: rgba(0,0,0,0.05);
+    padding: 3px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+.pricing-time-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    flex-wrap: wrap;
+}
+.pricing-time-row input {
+    width: 60px;
+    display: inline-block;
+}
+.pr-tiers {
+    border-top: 1px dashed #ddd;
+    padding-top: 8px;
+}
+.pr-tier-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.9em;
+    flex-wrap: wrap;
+}
+.pr-tier-row input {
+    width: 55px;
+    display: inline-block;
+    padding: 4px;
+}
+.pr-tier-row .delete-btn {
+    margin-left: auto;
+}
+.pr-add-tier {
+    margin-top: 4px;
+}
+.pricing-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+body.dark-theme .pricing-rule-card {
+    background-color: #26262a;
+    border-color: #3a3a3e;
+}
+body.dark-theme .pricing-tab-btn {
+    background-color: #2a2a2e;
+    color: #d0d0d0;
+}
+body.dark-theme .pricing-tab-btn.active {
+    background-color: #3498db;
+    color: white;
+}
+body.dark-theme .pricing-day-label {
+    background-color: rgba(255,255,255,0.08);
+}
+body.dark-theme .pr-tiers {
+    border-top-color: #3a3a3e;
+}

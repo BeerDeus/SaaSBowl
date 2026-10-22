@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tests SpaceBowling</title>
+<style>
+:root{--n:#0c2f47;--creme:#f3efe6;--papier:#fffdf9;--ligne:#d9d1c1;--doux:#5b6b78;--vert:#1e8e3e;--rouge:#d9272e;--amber:#d9900a;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--creme);color:#1a2430;font:14px/1.45 system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:var(--n);color:#fff;display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:12px 16px}
+header h1{margin:0;font-size:18px;flex:1;min-width:200px}
+#etat{font:600 13px var(--mono);padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.14)}
+#etat.ok{background:var(--vert)} #etat.ko{background:var(--rouge)}
+button{font:inherit;cursor:pointer;border:0;border-radius:4px;padding:7px 14px;background:#fff;color:var(--n);font-weight:700}
+button:disabled{opacity:.5;cursor:default}
+main{max-width:980px;margin:0 auto;padding:16px}
+.note{color:var(--doux);font-size:13px;margin:0 0 14px}
+.suite{background:var(--papier);border:1px solid var(--ligne);border-radius:6px;margin-bottom:14px;overflow:hidden}
+.suite h2{margin:0;padding:10px 14px;font-size:15px;border-bottom:1px solid var(--ligne);display:flex;gap:8px;align-items:baseline}
+.suite h2 small{color:var(--doux);font-weight:400}
+.t{display:grid;grid-template-columns:22px 1fr auto;gap:8px;padding:6px 14px;border-top:1px solid #eee7da;align-items:start}
+.t:first-of-type{border-top:0}
+.t i{font-style:normal;font-weight:800;text-align:center}
+.t.ok i{color:var(--vert)} .t.ko i{color:var(--rouge)} .t.encours i{color:var(--amber)}
+.t small{font:12px var(--mono);color:var(--doux)}
+.t pre{grid-column:2/-1;margin:2px 0 4px;white-space:pre-wrap;font:12px/1.4 var(--mono);color:var(--rouge);background:#fbe6e7;padding:6px 8px;border-radius:4px}
+details{margin-top:18px}
+summary{cursor:pointer;font-weight:700;color:var(--n)}
+.cadres{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.cadre{overflow:hidden;border:1px solid var(--ligne);background:#fff}
+.cadre iframe{border:0;transform-origin:0 0;display:block}
+#c-crm{width:504px;height:315px} #c-crm iframe{width:1440px;height:900px;transform:scale(.35)}
+#c-borne{width:189px;height:336px} #c-borne iframe{width:540px;height:960px;transform:scale(.35)}
+#c-site{width:448px;height:280px} #c-site iframe{width:1280px;height:800px;transform:scale(.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--creme:#14202b;--papier:#1b2a37;--ligne:#2c3e4e;--doux:#9fb2c2}body{color:#e6edf2}.t{border-top-color:#24343f}}
+</style>
+</head>
+<body>
+<header><h1>Tests SpaceBowling · CRM, moteur, borne et site</h1><span id="etat">Prêt</span><button id="go" type="button">Lancer les tests</button></header>
+<main>
+  <p class="note">Les tests travaillent sur une sandbox à part (clés <code>sbx-test:*</code>) : ta sandbox et les onglets CRM ou borne ouverts à côté ne sont pas touchés.
+    Filtrer : <code>?suite=Borne</code> ou <code>?test=laser</code>. En ligne de commande : <code>python tests/lancer.py</code>.</p>
+  <div id="res"></div>
+  <details open><summary>Écrans de test</summary>
+    <div class="cadres"><div class="cadre" id="c-crm"><iframe id="crm" title="CRM de test"></iframe></div><div class="cadre" id="c-borne"><iframe id="borne" title="Borne de test"></iframe></div><div class="cadre" id="c-site"><iframe id="site" title="Site de réservation de test"></iframe></div></div>
+  </details>
+</main>
+<script>window.SBX_ESPACE = 'test';</script>
+<script src="tests.js?v=14"></script>
+</body>
+</html>

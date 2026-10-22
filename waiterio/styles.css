@@ -1,0 +1,1025 @@
+:root {
+    --primary-color: #0d47a1;
+    --primary-light: #5472d3;
+    --primary-dark: #002171;
+    --danger-color: #d32f2f;
+    --light-grey: #f5f5f5;
+    --grey: #e0e0e0;
+    --dark-grey: #424242;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: var(--light-grey);
+    color: var(--dark-grey);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* --- Section Connexion --- */
+#login-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+}
+
+#login-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    font-size: 16px;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+#login-btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+#login-btn img {
+    margin-right: 12px;
+}
+
+/* --- Section Application --- */
+#app-section header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.header-left {
+    flex: 1 1 auto;
+    min-width: 0; /* laisse #user-name se tronquer au lieu de pousser les boutons hors écran */
+}
+
+#user-info {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+#user-pic {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    margin-right: 8px;
+    flex: 0 0 auto;
+}
+#user-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 0 0 auto;
+}
+
+/* Boutons d'action du header en icônes : tient sur un petit écran même avec les 3 boutons admin affichés */
+.header-icon-btn {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 auto;
+    border: none;
+    background-color: transparent;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.header-icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+main {
+    padding: 20px;
+}
+
+#orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.order-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+    position: relative;
+}
+.order-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+.order-card h3 {
+    margin-top: 0;
+    color: var(--primary-dark);
+}
+
+/* Commande validée depuis le kiosque : reste visible ici (pas supprimée), juste marquée en vert. */
+.order-card.completed {
+    background-color: #c8e6c9;
+}
+
+/* --- MODE KIOSQUE : écran tactile fixe, gros boutons, uniquement l'affichage des commandes --- */
+#kiosk-mode-btn.active {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Le header ne garde que le bouton kiosque (tout le reste ci-dessous est masqué) -- on le
+   sort du flux normal (position fixed, en petite pastille flottante en haut à droite, loin
+   du gros bouton de validation en bas à droite) au lieu de lui laisser une barre pleine
+   largeur, pour que <main> récupère toute la hauteur de l'écran. */
+.kiosk-mode #app-section header {
+    position: fixed;
+    top: 8px;
+    bottom: auto;
+    right: 8px;
+    left: auto;
+    width: auto;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    z-index: 500;
+}
+.kiosk-mode .header-left,
+.kiosk-mode #add-order-btn,
+.kiosk-mode #add-reassort-btn,
+.kiosk-mode #stock-management-btn,
+.kiosk-mode #admin-users-btn,
+.kiosk-mode #logout-btn {
+    display: none !important;
+}
+.kiosk-mode #kiosk-mode-btn {
+    background-color: rgba(0, 0, 0, 0.35);
+}
+
+.kiosk-mode main {
+    padding: 0;
+}
+.kiosk-mode main h2 {
+    display: none;
+}
+
+.kiosk-mode #orders-grid {
+    display: block;
+    min-height: 100dvh;
+    padding: 60px 16px 16px;
+}
+.kiosk-mode #orders-grid p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100dvh;
+    margin: 0;
+    text-align: center;
+    font-size: 1.6em;
+    color: #666;
+}
+
+/* Vue grille : une case par commande, juste le prénom. Verte et clignotante tant qu'elle
+   n'a pas été ouverte une 1re fois ; puis orange à partir de 3 min sans validation, rouge
+   à partir de 5 min, pour que l'urgence saute aux yeux même sans toucher l'écran.
+   Jamais plus de 4 commandes en attente en pratique -> grille fixe 2x2 plein écran, chaque
+   case occupe un quart d'écran plutôt que de rétrécir avec une grille auto-fill. */
+.kiosk-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 20px;
+    height: calc(100dvh - 76px);
+}
+.kiosk-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: 4.5em;
+    font-weight: bold;
+    text-align: center;
+    word-break: break-word;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.kiosk-tile--normal {
+    animation: kiosk-tile-blink-orange 1s ease-in-out infinite;
+}
+.kiosk-tile--new {
+    animation: kiosk-tile-blink-green 1s ease-in-out infinite;
+}
+.kiosk-tile--urgent {
+    animation: kiosk-tile-blink-orange 1s ease-in-out infinite;
+}
+.kiosk-tile--critical {
+    animation: kiosk-tile-blink-red 0.6s ease-in-out infinite;
+}
+@keyframes kiosk-tile-blink-green {
+    0%, 100% { background-color: #43a047; }
+    50% { background-color: #a5d6a7; }
+}
+@keyframes kiosk-tile-blink-orange {
+    0%, 100% { background-color: #ef6c00; }
+    50% { background-color: #ffcc80; }
+}
+@keyframes kiosk-tile-blink-red {
+    0%, 100% { background-color: #c62828; }
+    50% { background-color: #ef9a9a; }
+}
+
+/* Vue détail : la commande ouverte prend tout l'écran, avec la liste des boissons et le
+   gros bouton vert pour la valider. */
+.kiosk-mode .order-card.kiosk-detail {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 90px 40px 260px;
+    overflow-y: auto;
+    font-size: 3.4em;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.kiosk-mode .order-card.kiosk-detail h3 {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+/* Taille du texte des boissons adaptée au nombre d'articles (indépendante du font-size de
+   la carte, en rem), et passage en 2 colonnes au-delà de 6 boissons pour rester lisible. */
+.kiosk-drinks {
+    line-height: 1.5;
+}
+.kiosk-drinks--xl { font-size: 4.5rem; }
+.kiosk-drinks--lg { font-size: 3.25rem; }
+.kiosk-drinks--md { font-size: 2.375rem; }
+.kiosk-drinks--sm { font-size: 1.75rem; }
+
+/* 2 colonnes qui prennent chacune 40% de la largeur de l'écran, marges de 5% de chaque côté
+   et 10% au milieu (5+40+10+40+5=100%) -- les colonnes sont 2 blocs distincts remplis côté
+   JS (pas un reflow column-count) pour contrôler ce découpage précisément. La marge négative
+   annule le padding fixe (40px) de .kiosk-detail pour repartir des pourcentages sur 100%
+   de l'écran plutôt que sur la largeur déjà réduite par ce padding. */
+.kiosk-drinks--two-col {
+    display: grid;
+    grid-template-columns: 5% 40% 10% 40% 5%;
+    margin: 0 -40px;
+    width: calc(100% + 80px);
+}
+.kiosk-drinks--two-col .kiosk-drinks-col:nth-child(1) {
+    grid-column: 2;
+}
+.kiosk-drinks--two-col .kiosk-drinks-col:nth-child(2) {
+    grid-column: 4;
+}
+.kiosk-drink-item {
+    break-inside: avoid;
+}
+
+.kiosk-back-btn {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--grey);
+    color: var(--dark-grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 20;
+}
+
+.kiosk-validate-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    border: none;
+    background-color: #43a047;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 100px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    z-index: 20;
+}
+.kiosk-validate-btn .material-icons {
+    font-size: 1em;
+}
+
+/* --- MONITORING BAR (mode kiosque) : vue plein écran alternative, basculée par le bouton 🍹 du
+   header -- garde l'écran utile même sans commande anniversaire en attente. Thème sombre repris du
+   Monitoring Bar (Picture-in-Picture) du site principal, pour une identité visuelle cohérente. --- */
+.kiosk-bar-monitor-view {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: #1a1d24;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+}
+.kiosk-bar-monitor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+.kiosk-bar-monitor-header h2 {
+    margin: 0;
+    font-size: 1.3em;
+}
+#kiosk-bar-monitor-back-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+}
+.kiosk-bar-monitor-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.kiosk-bar-monitor-empty {
+    text-align: center;
+    color: #8a8f99;
+    font-size: 1.1em;
+    margin-top: 40px;
+}
+.kiosk-bar-order-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #2c313c;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 1.05em;
+    border: 2px solid #444;
+}
+.kiosk-bar-order-item.pending {
+    border-color: #f4d91a;
+    animation: kioskBarPendingBlink 1s infinite;
+}
+@keyframes kioskBarPendingBlink {
+    50% { opacity: .6; }
+}
+.kiosk-bar-order-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+.kiosk-bar-order-zone {
+    font-weight: bold;
+}
+.kiosk-bar-order-time {
+    font-size: 0.8em;
+    color: #b0b4bd;
+}
+.kiosk-bar-order-amount {
+    font-weight: bold;
+}
+.kiosk-bar-order-status {
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #1a1d24;
+}
+.kiosk-bar-order-dismiss-btn {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    color: #8a8f99;
+    font-size: 1.3em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+.kiosk-bar-order-dismiss-btn:hover {
+    background: rgba(231, 76, 60, 0.25);
+    color: #fff;
+}
+
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-light);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* --- Modals --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+}
+
+#add-order-form input[type="text"] {
+    width: calc(100% - 20px);
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--grey);
+    border-radius: 4px;
+}
+
+.drink-category {
+    margin-bottom: 20px;
+}
+.drink-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.counter {
+    display: flex;
+    align-items: center;
+}
+.counter button {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--grey);
+    background-color: var(--light-grey);
+    font-size: 18px;
+    cursor: pointer;
+}
+.counter .quantity {
+    width: 40px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.modal-actions button[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+}
+.modal-actions .danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* --- NOUVEAUX STYLES MODAL ADMIN --- */
+#users-list-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--light-grey);
+    border-radius: 4px;
+}
+
+.user-row-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-row-info .name {
+    font-weight: bold;
+}
+.user-row-info .email {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.user-role-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid var(--grey);
+}
+
+
+/* --- NOUVEAUX STYLES POUR LES ONGLETS DE BOISSONS --- */
+#drink-tabs-container {
+    margin: 20px 0;
+    border: 1px solid var(--grey);
+    border-radius: 4px;
+}
+
+#drink-tab-buttons {
+    display: flex;
+    background-color: var(--light-grey);
+    border-bottom: 1px solid var(--grey);
+    flex-wrap: wrap; /* Ajoute cette ligne */
+}
+
+.tab-button {
+    padding: 10px 15px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 1em;
+    color: #555;
+    border-bottom: 3px solid transparent;
+}
+.tab-button.active {
+    color: var(--primary-color);
+    font-weight: bold;
+    border-bottom-color: var(--primary-color);
+}
+
+#drink-tab-panels {
+    padding: 15px;
+}
+
+.tab-panel {
+    display: none; /* Caché par défaut */
+}
+
+.tab-panel.active {
+    display: block; /* Affiché si actif */
+}
+
+#total-drinks-display {
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: center;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    color: var(--primary-dark);
+}
+
+/* NOUVEAU : Styles pour l'en-tête du modal de vue */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.modal-header h3 {
+    margin: 0;
+}
+.btn-edit {
+    padding: 8px 12px;
+    border: 1px solid var(--primary-color);
+    background-color: transparent;
+    color: var(--primary-color);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+.btn-edit:hover {
+    background-color: var(--primary-light);
+    color: white;
+    border-color: var(--primary-light);
+}
+
+#stock-list-container .stock-category h4 {
+    margin-bottom: 10px;
+    color: var(--primary-dark);
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 5px;
+}
+
+.stock-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 5px;
+}
+
+/* Style pour l'interrupteur */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+.switch input { display:none; }
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: var(--primary-color);
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* --- STYLE POUR LES BOISSONS HORS STOCK DANS LE FORMULAIRE --- */
+.drink-item.out-of-stock {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+.drink-item.out-of-stock .counter button {
+    pointer-events: none; /* Empêche de cliquer sur les boutons + et - */
+}
+
+/* --- RÉASSORT DU SOIR --- */
+.fab-left {
+    left: 30px;
+    right: auto;
+    background-color: #f57c00;
+}
+
+.fab-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: var(--danger-color);
+    color: white;
+    border-radius: 50%;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 4px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Modale plein écran : le clavier mobile ne doit jamais recouvrir la recherche */
+#reassort-modal.modal-overlay {
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0;
+}
+
+.reassort-modal-content {
+    width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.reassort-topbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 8px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    border-bottom: 1px solid var(--grey);
+}
+.reassort-topbar h3 {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: 1.1em;
+}
+.reassort-close-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background-color: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-grey);
+    cursor: pointer;
+}
+.reassort-close-btn:active {
+    background-color: var(--light-grey);
+}
+
+/* Zone scrollable entre la barre du haut et les actions/recherche du bas */
+.reassort-view {
+    flex: 1 1 auto;
+    min-height: 0; /* nécessaire pour qu'overflow fonctionne dans un flex column */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+}
+
+.reassort-action-bar {
+    flex: 0 0 auto;
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--grey);
+}
+.reassort-action-bar button {
+    flex: 1;
+    min-height: 44px;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#reassort-finish-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Barre de recherche fixée en bas, juste au-dessus du clavier */
+.reassort-search-bar {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background-color: var(--light-grey);
+    border-top: 1px solid var(--grey);
+}
+
+.reassort-search-wrap {
+    position: relative;
+}
+.reassort-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+#reassort-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 48px;
+    padding: 12px 14px 12px 44px;
+    font-size: 16px; /* >= 16px : empêche le zoom auto au focus sur iOS */
+    border: 1px solid var(--grey);
+    border-radius: 8px;
+}
+#reassort-search-input:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+}
+
+/* La suggestion remonte au-dessus du champ, puisque le champ est en bas d'écran */
+.reassort-suggestions {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid var(--grey);
+    border-radius: 8px;
+    box-shadow: 0 -4px 14px rgba(0,0,0,0.18);
+    max-height: 45vh;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+.suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--light-grey);
+    text-align: left;
+    font-size: 15px;
+    cursor: pointer;
+}
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+.suggestion-item:active {
+    background-color: var(--light-grey);
+}
+.suggestion-cat {
+    font-size: 0.8em;
+    color: #666;
+}
+.suggestion-custom {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.reassort-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.reassort-empty {
+    text-align: center;
+    color: #666;
+}
+
+.reassort-category {
+    margin-bottom: 14px;
+}
+.reassort-category-title {
+    margin: 0 0 6px;
+    padding-bottom: 4px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--primary-dark);
+    border-bottom: 2px solid var(--primary-light);
+}
+.reassort-category .reassort-item + .reassort-item {
+    margin-top: 8px;
+}
+
+.reassort-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    background-color: var(--light-grey);
+    border-radius: 6px;
+}
+.reassort-item.done {
+    opacity: 0.5;
+}
+.reassort-item.done .reassort-name {
+    text-decoration: line-through;
+}
+.reassort-item.read-only {
+    justify-content: space-between;
+    background-color: white;
+    padding: 6px 4px;
+}
+
+.reassort-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* Compteurs de quantité un peu plus grands que ceux des commandes : usage à la hâte, en cave */
+.reassort-item .counter button {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+}
+
+.reassort-icon-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--dark-grey);
+}
+.reassort-icon-btn:active {
+    background-color: var(--grey);
+}
+.reassort-item .reassort-icon-btn[data-action="toggle"] {
+    color: var(--primary-color);
+}
+.reassort-item.done .reassort-icon-btn[data-action="toggle"] {
+    color: #43a047;
+}
+.reassort-item .reassort-icon-btn[data-action="delete"] {
+    color: var(--danger-color);
+}
+
+#reassort-history-view {
+    padding-bottom: 12px;
+}
+
+.reassort-history-entry {
+    background-color: var(--light-grey);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    padding: 4px 12px;
+}
+.reassort-history-entry summary {
+    padding: 10px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    color: var(--primary-dark);
+    cursor: pointer;
+    list-style: revert;
+}
+.reassort-history-entry[open] summary {
+    margin-bottom: 8px;
+}

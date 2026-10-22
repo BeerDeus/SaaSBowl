@@ -1,0 +1,57 @@
+/* Kit de motion design SpaceBowling : la scène 1080 × 1920, les couleurs du centre, le ciel, les confettis, les ballons
+   et une petite bibliothèque d'animations. Chaque élément animé prend son instant de départ dans --a (en secondes). */
+:root{--n:#0c2f47;--n2:#143f5e;--nuit:#04121f;--sky:#00aee0;--sky2:#7fd4f2;--rouge:#d9272e;--rose:#ff3d7f;--jaune:#f5c542;--creme:#fffdf9;--cond:'Barlow Semi Condensed',sans-serif;--txt:'Barlow',sans-serif;--ease:cubic-bezier(.2,.8,.2,1);--rebond:cubic-bezier(.3,1.6,.45,1)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#020a12;overflow:hidden}
+body{display:grid;place-items:center;font-family:var(--txt);color:#fff}
+.cadre{position:relative;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.6)}
+#scene{position:absolute;left:0;top:0;width:1080px;height:1920px;overflow:hidden;transform-origin:0 0;background:var(--n)}
+html.rendu body{display:block}
+html.rendu .cadre{width:1080px;height:1920px;box-shadow:none}
+/* zone du bas couverte sur la borne par « Touchez l'écran pour commencer » : rien d'important sous y = 1640 */
+.barre{position:fixed;left:50%;bottom:10px;translate:-50% 0;display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.1);padding:8px 14px;border-radius:99px;font:600 14px var(--txt)}
+.barre button{font:inherit;color:#fff;background:var(--rouge);border:0;border-radius:99px;padding:6px 14px;cursor:pointer}
+.barre input{width:320px}.barre output{width:60px}
+
+/* ---- fond : nuit, lueurs qui dérivent, étoiles ---- */
+.fond{position:absolute;inset:0;background:radial-gradient(110% 60% at 50% 105%,#123f63,transparent 70%),linear-gradient(#030e19,#0a2a42 60%,#0c2f47)}
+.lueur{position:absolute;border-radius:50%;filter:blur(90px);animation:derive 9s ease-in-out infinite alternate}
+.ciel{position:absolute;inset:0}
+.ciel i{position:absolute;width:var(--s);height:var(--s);border-radius:50%;background:#fff;box-shadow:0 0 12px rgba(190,235,255,.9);animation:scintille var(--t) ease-in-out infinite}
+
+/* ---- plans : un plan entre à --a et sort à --b ---- */
+.plan{position:absolute;inset:0;opacity:0;animation:planIn .45s var(--ease) var(--a) both,planOut .4s ease-in var(--b) forwards}
+/* volet : bande de couleur qui balaie l'écran entre deux plans */
+.volet{position:absolute;left:-30%;top:-20%;width:160%;height:140%;background:var(--c);transform:translateX(-120%) skewX(-14deg);animation:volet .8s cubic-bezier(.7,0,.3,1) var(--a) both}
+.onde{position:absolute;width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;border:26px solid var(--c);opacity:0;animation:onde 1.1s var(--ease) var(--a) both}
+
+/* ---- textes ---- */
+.centre{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+.titre{font:700 var(--fs,120px)/.95 var(--cond);text-transform:uppercase;letter-spacing:.01em;text-align:center}
+.l{display:inline-block;animation:lettre .6s var(--rebond) calc(var(--a) + var(--i) * .06s) both}
+.monte{animation:monte .7s var(--ease) var(--a) both}
+.pop{animation:pop .7s var(--rebond) var(--a) both}
+.masque{display:block;overflow:hidden;padding:0 20px}.masque>*{display:block;animation:masque .7s var(--ease) var(--a) both}
+
+/* ---- confettis, ballons ---- */
+.confetti{position:absolute;width:var(--w);height:var(--h);background:var(--c);border-radius:3px;opacity:0;animation:confetti var(--d) cubic-bezier(.15,.7,.4,1) both}
+.ballon{position:absolute;top:1960px;width:calc(170px * var(--k));animation:ballon var(--d) linear var(--a) both}
+.ballon svg{display:block;width:100%;height:auto;transform-origin:50% 0;animation:balance 2.6s ease-in-out infinite alternate}
+
+@keyframes scintille{50%{opacity:.25;scale:.6}}
+@keyframes derive{to{translate:120px -90px;scale:1.2}}
+@keyframes planIn{from{opacity:0;scale:1.06}to{opacity:1;scale:1}}
+@keyframes planOut{to{opacity:0;scale:.94;translate:0 -40px}}
+@keyframes volet{0%{transform:translateX(-120%) skewX(-14deg)}100%{transform:translateX(120%) skewX(-14deg)}}
+@keyframes onde{0%{opacity:.95;scale:.1}100%{opacity:0;scale:4.5;border-width:2px}}
+@keyframes lettre{0%{opacity:0;transform:translateY(80px) scale(.3) rotate(-18deg)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes monte{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.2) rotate(-10deg)}60%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes masque{from{transform:translateY(105%)}to{transform:none}}
+@keyframes confetti{0%{opacity:1;transform:translate(0,0) rotate(0) scale(.4)}22%{opacity:1;transform:translate(var(--dx),var(--dy)) rotate(calc(var(--r) * .3)) scale(1)}85%{opacity:1}100%{opacity:0;transform:translate(calc(var(--dx) * 1.25),calc(var(--dy) + var(--chute))) rotate(var(--r)) scale(1)}}
+@keyframes ballon{from{transform:translateY(0)}to{transform:translateY(-2500px)}}
+@keyframes balance{from{rotate:-6deg}to{rotate:6deg}}
+@keyframes flamme{0%,100%{transform:scale(1,1) rotate(-3deg)}50%{transform:scale(.85,1.15) rotate(3deg)}}
+@keyframes tourne{to{rotate:360deg}}
+@keyframes flotte{50%{translate:0 -18px}}
+@keyframes pulse{0%{opacity:.9;scale:.4}100%{opacity:0;scale:2.2}}

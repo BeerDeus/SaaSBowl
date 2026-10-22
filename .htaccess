@@ -1,0 +1,6 @@
+Header set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+
+RewriteEngine On
+# /laser/chrono -> laser/chrono.html (URL propre, sans extension)
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^([^.]+)$ $1.html [L]

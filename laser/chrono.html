@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Chronos — Questoria</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { height:100%; }
+  body { font-family:-apple-system,system-ui,Segoe UI,sans-serif; background:#1a1d24; color:#fff; overflow:hidden; }
+
+  /* --- Écran de connexion --- */
+  #auth-screen { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:#1a1d24; }
+  #auth-screen button { padding:14px 28px; font-size:18px; border:none; border-radius:8px; background:#19b0e5; color:#fff; font-weight:600; cursor:pointer; }
+  #auth-status { opacity:.7; font-size:15px; }
+
+  /* --- Grille des chronos --- */
+  #chrono-screen { display:none; height:100%; padding:14px; flex-direction:column; }
+  #pip-grid { display:grid; gap:14px; flex:1 1 auto; min-height:0; grid-auto-rows:1fr; }
+  .pip-tile { container-type:size; container-name:piptile; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#2c313c; border-radius:16px; padding:clamp(4px,4cqh,10px); border:5px solid transparent; min-height:0; overflow:hidden; }
+  .pip-title { font-size:clamp(10px, min(9cqw,20cqh), 40px); font-weight:600; text-align:center; line-height:1.15; margin-bottom:clamp(2px,2cqh,8px); opacity:.9; }
+  .pip-time { font-family:monospace; font-weight:700; font-size:clamp(24px,45cqh,180px); line-height:1; }
+  .pip-tile.warn { border-color:#f39c12; }
+  .pip-tile.warn .pip-time { color:#f39c12; }
+  .pip-tile.ended { border-color:#e74c3c; animation:pipBlink 1s infinite; }
+  .pip-tile.ended .pip-time { color:#e74c3c; }
+  @keyframes pipBlink { 50% { opacity:.45; } }
+  #pip-empty { flex:1 1 auto; display:flex; align-items:center; justify-content:center; text-align:center; opacity:.6; font-size:clamp(14px,3vw,26px); padding:20px; line-height:1.4; }
+  #pip-billard { display:none; flex:0 0 auto; margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,.15); }
+  #pip-billard.show { display:block; }
+  #pip-billard-title { font-size:15px; text-transform:uppercase; letter-spacing:.04em; opacity:.7; margin-bottom:6px; }
+  .pip-billard-item { display:inline-block; background:#2c313c; border-radius:6px; padding:6px 12px; margin:0 6px 6px 0; font-size:16px; }
+
+  /* --- Anniversaires : grille de tuiles carrées, ~50% de l'écran en "mode anniversaire" --- */
+  #bday-timeline { display:none; flex-direction:column; flex:0 0 50vh; min-height:0; margin-bottom:14px; padding:12px 18px; border-radius:18px; background:linear-gradient(135deg,#3a2a14,#241c12); border:1px solid rgba(243,156,18,.4); overflow:hidden; }
+  #bday-timeline.show { display:flex; }
+  #bday-timeline-label { flex:0 0 auto; font-size:clamp(15px,2.2vh,24px); font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#f39c12; margin-bottom:10px; }
+  #bday-timeline-track { flex:1 1 auto; min-height:0; display:flex; flex-direction:row; flex-wrap:nowrap; align-items:stretch; gap:12px; overflow:hidden; }
+
+  .bday-item { position:relative; flex:1 1 150px; max-width:220px; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px; padding:10px 8px; border-radius:16px; background:#2c313c; border:4px solid #7f8c8d; min-height:0; overflow:hidden; transition:transform .2s ease, box-shadow .2s ease; }
+  .bday-chevron { flex:0 0 auto; align-self:center; opacity:.4; font-size:clamp(18px,4vh,36px); }
+  .bday-tile-head { display:flex; flex-direction:column; gap:2px; min-width:0; max-width:100%; }
+  .bday-item .bday-name { font-weight:700; font-size:clamp(30px,5.2vh,48px); line-height:1.1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bday-item .bday-name.two-line { display:flex; flex-direction:column; white-space:normal; gap:0; }
+  .bday-item .bday-name .bday-name-line { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bday-item .bday-activity { opacity:.7; font-size:clamp(22px,3.4vh,32px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bday-item .bday-time { font-family:monospace; font-weight:700; font-size:clamp(18px,3.6vh,34px); line-height:1; }
+
+  .bday-item.laser { border-color:#e74c3c; }
+  .bday-item.laser .bday-time { color:#e74c3c; }
+  .bday-item.bowling { border-color:#2ecc71; }
+  .bday-item.bowling .bday-time { color:#2ecc71; }
+  .bday-item.quiz { border-color:#e67e22; }
+  .bday-item.quiz .bday-time { color:#e67e22; }
+
+  /* Rappel "lancer la 2e partie de laser" -- couleur cyan dédiée, bien distincte du rouge
+     "laser en cours" (.bday-item.laser) pour ne jamais confondre les deux sur la frise. */
+  .bday-item.laser-reminder { border-color:#00bcd4; background:#173338; }
+  .bday-item.laser-reminder .bday-time { color:#00bcd4; }
+  .bday-item.laser-reminder.ready { background:#123e44; box-shadow:0 0 16px rgba(0,188,212,.6); animation:pipBlink 1s infinite; }
+  .bday-item.laser-reminder.ready .bday-time { color:#00e5ff; }
+
+  .bday-item.next { box-shadow:0 0 16px rgba(243,156,18,.55); }
+  .bday-item.next::before { content:'PROCHAIN'; position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:#f39c12; color:#1a1d24; font-size:10px; font-weight:800; letter-spacing:.05em; padding:2px 10px; border-radius:6px; white-space:nowrap; }
+
+  .bday-item.urgent { animation:pipBlink 1s infinite; }
+  .bday-item.urgent .bday-time { color:#e74c3c; }
+  .bday-item.finished { border-color:#e74c3c; background:#3a2020; }
+  .bday-item.finished .bday-time { color:#e74c3c; animation:pipBlink 1s infinite; }
+
+  /* Moment gâteau : dérivé automatiquement de la dernière activité de l'anniversaire.
+     Cliquable pour le valider (checklist.cake) directement depuis l'écran chrono. */
+  .bday-item.gateau { border-color:#ff4fa3; background:#332430; cursor:pointer; }
+  .bday-item.gateau:hover { background:#3d2c39; }
+  .bday-item.gateau:active { transform:scale(0.96); }
+  .bday-item.gateau .bday-time { color:#ff4fa3; }
+  .bday-item.gateau .bday-gateau-hint { font-size:clamp(10px,1.5vh,13px); font-weight:700; color:#ff4fa3; background:rgba(255,79,163,.16); padding:3px 10px; border-radius:20px; }
+  .bday-item.gateau.ready { background:#402030; box-shadow:0 0 16px rgba(255,79,163,.55); animation:pipBlink 1s infinite; }
+  .bday-item.gateau.ready .bday-time { color:#ff4fa3; }
+
+  .bday-item.bday-more { border-color:#f39c12; background:#332813; cursor:default; }
+  .bday-item.bday-more .bday-time { color:#f39c12; font-size:clamp(20px,4.5vh,40px); }
+  .bday-item.bday-more .bday-activity { opacity:.85; }
+</style>
+</head>
+<body>
+
+  <div id="auth-screen">
+    <div id="auth-status">Connexion requise pour afficher les chronos.</div>
+    <button id="login-btn">Se connecter avec Google</button>
+  </div>
+
+  <div id="chrono-screen">
+    <div id="bday-timeline">
+      <span id="bday-timeline-label">🎂 Anniversaires en cours</span>
+      <div id="bday-timeline-track"></div>
+    </div>
+    <div id="pip-grid"></div>
+    <div id="pip-empty">Chargement…</div>
+    <div id="pip-billard"></div>
+  </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, onSnapshot, collection, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Même config que l'app principale (index.html)
+const firebaseConfig = {
+    apiKey: "AIzaSyC8PUEm3iIU-AQvEBGroyuvSkRSuIzW6Js",
+    authDomain: "bowlingbackend.firebaseapp.com",
+    projectId: "bowlingbackend",
+    storageBucket: "bowlingbackend.firebasestorage.app",
+    messagingSenderId: "1034643104412",
+    appId: "1:1034643104412:web:7f722d34fb6b508f770359",
+    measurementId: "G-0SV8T1V8MC",
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const shortTitles = {
+    1: "⬇️ Salle Bas ⬇️",
+    2: "⬆️ Salle Haut ⬆️",
+    3: "🎙️ Karaoké 🎙️",
+    4: "🚨 QuizzBoxing 🚨"
+};
+
+const authScreen = document.getElementById('auth-screen');
+const chronoScreen = document.getElementById('chrono-screen');
+const authStatus = document.getElementById('auth-status');
+const loginBtn = document.getElementById('login-btn');
+const grid = document.getElementById('pip-grid');
+const empty = document.getElementById('pip-empty');
+const billardEl = document.getElementById('pip-billard');
+const bdayWrapper = document.getElementById('bday-timeline');
+const bdayTrack = document.getElementById('bday-timeline-track');
+
+loginBtn.addEventListener('click', () => {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    signInWithPopup(auth, provider).catch(err => {
+        authStatus.textContent = "Erreur de connexion : " + err.message;
+    });
+});
+
+let timers = {};
+let billardQueue = [];
+let bdayEntries = [];
+let unsubTimers = null, unsubBillard = null, unsubBdays = null, tickInterval = null;
+
+function formatDateForStorage(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function escHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Détecte "deux prénoms" dans le champ nom (ex: "Mathis & Lucas", "Mathis et Lucas",
+// "Mathis / Lucas", "Mathis, Lucas") pour les afficher sur 2 lignes plutôt que de les
+// rétrécir à l'extrême ou les tronquer avec "...".
+function splitTwoNames(rawName) {
+    const parts = String(rawName ?? '')
+        .split(/\s*(?:&|\+|\/|,|\bet\b)\s*/i)
+        .map(s => s.trim())
+        .filter(Boolean);
+    return parts.length === 2 ? parts : null;
+}
+
+// Construit le <span class="bday-name"> : sur 2 lignes si 2 prénoms détectés, sinon 1 ligne.
+function bdayNameSpanHtml(rawName) {
+    const twoNames = splitTwoNames(rawName);
+    if (twoNames) {
+        return '<span class="bday-name two-line">' +
+            `<span class="bday-name-line">${escHtml(twoNames[0])}</span>` +
+            `<span class="bday-name-line">${escHtml(twoNames[1])}</span>` +
+            '</span>';
+    }
+    return `<span class="bday-name">${escHtml(rawName)}</span>`;
+}
+
+// Clé du timer de la DERNIÈRE activité de la formule (le plus grand index "type_N").
+// Par défaut, c'est cette activité qui, une fois lancée, déclenche le "moment gâteau".
+function findLastActivityKey(timersObj) {
+    let lastKey = null, lastIdx = -1;
+    Object.keys(timersObj).forEach(k => {
+        const idx = parseInt(k.slice(k.lastIndexOf('_') + 1), 10);
+        if (!isNaN(idx) && idx >= lastIdx) { lastIdx = idx; lastKey = k; }
+    });
+    return lastKey;
+}
+// Clé du timer de la PREMIÈRE activité (le plus petit index). Utilisée quand la fiche a la case
+// "Entre les 2 jeux" cochée : le gâteau se cale alors sur la fin de la 1ère activité (dès son
+// lancement) au lieu d'attendre la dernière.
+function findFirstActivityKey(timersObj) {
+    let firstKey = null, firstIdx = Infinity;
+    Object.keys(timersObj).forEach(k => {
+        const idx = parseInt(k.slice(k.lastIndexOf('_') + 1), 10);
+        if (!isNaN(idx) && idx <= firstIdx) { firstIdx = idx; firstKey = k; }
+    });
+    return firstKey;
+}
+
+// Repère qu'une activité qui vient de se terminer est directement suivie (index+1) d'un LASER
+// pas encore lancé, pour rappeler de le lancer -- en tenant compte de la pause de 20 min
+// obligatoire avant d'entrer dans la salle laser. Couvre à la fois "laser_jeune" (Laser 1 ->
+// Laser 2) et "bowling_laser" quand l'ordre a été inversé via le bouton 🔄 (Bowling -> Laser,
+// utilisé quand tous les créneaux laser sont pris à l'heure normale de la fiche).
+const LASER_PAUSE_MS = 20 * 60 * 1000;
+function buildLaserReminderEntries(bd, now) {
+    const ordered = Object.keys(bd.timers)
+        .map(key => ({ key, idx: parseInt(key.slice(key.lastIndexOf('_') + 1), 10), t: bd.timers[key] }))
+        .filter(e => !isNaN(e.idx))
+        .sort((a, b) => a.idx - b.idx);
+
+    const out = [];
+    for (let i = 0; i < ordered.length - 1; i++) {
+        const curr = ordered[i], next = ordered[i + 1];
+        if (next.t.type !== 'laser') continue;
+        if (next.idx !== curr.idx + 1) continue;
+        if (!curr.t.endTime || curr.t.endTime > now) continue; // activité précédente pas encore terminée
+        if (next.t.endTime) continue; // laser déjà lancé : son propre chrono prend le relais
+
+        out.push({
+            kind: 'laser-reminder',
+            endTime: curr.t.endTime + LASER_PAUSE_MS,
+            name: bd.name,
+            label: next.t.label || 'Laser'
+        });
+    }
+    return out;
+}
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        authScreen.style.display = 'none';
+        chronoScreen.style.display = 'flex';
+        if (!unsubTimers) {
+            unsubTimers = onSnapshot(doc(db, "timers", "liveState"), (snap) => {
+                timers = snap.exists() ? snap.data() : {};
+            });
+        }
+        if (!unsubBillard) {
+            unsubBillard = onSnapshot(doc(db, "queues", "billard"), (snap) => {
+                billardQueue = (snap.exists() && snap.data().list) ? snap.data().list : [];
+            });
+        }
+        if (!unsubBdays) {
+            // Fenêtre glissante J-1 à J+1 : les chronos d'anniversaire sont posés le jour même,
+            // la marge sert juste à couvrir un chrono lancé juste avant/après minuit.
+            const windowStart = formatDateForStorage(new Date(Date.now() - 24 * 60 * 60 * 1000));
+            const windowEnd = formatDateForStorage(new Date(Date.now() + 24 * 60 * 60 * 1000));
+            unsubBdays = onSnapshot(
+                query(
+                    collection(db, "dailyBirthdays"),
+                    where("date", ">=", windowStart),
+                    where("date", "<=", windowEnd)
+                ),
+                (snapshot) => {
+                    const birthdays = [];
+                    snapshot.forEach(d => birthdays.push({ id: d.id, ...d.data() }));
+
+                    const now = Date.now();
+                    const entries = [];
+
+                    birthdays.forEach(bd => {
+                        if (!bd.timers) return;
+                        const keys = Object.keys(bd.timers);
+                        if (!keys.length) return;
+
+                        const cakeDone = !!(bd.checklist && bd.checklist.cake);
+                        const cakeBetween = !!(bd.checklist && bd.checklist.cakeBetweenGames);
+                        const anchorKey = cakeBetween ? findFirstActivityKey(bd.timers) : findLastActivityKey(bd.timers);
+
+                        keys.forEach(key => {
+                            const t = bd.timers[key];
+                            if (!t.endTime) return; // chrono pas encore lancé : rien à afficher
+
+                            const remainingMs = t.endTime - now;
+                            const isLastPendingCake = (key === anchorKey) && !cakeDone;
+
+                            if (isLastPendingCake) {
+                                // Dernière activité + gâteau pas encore coché : le "moment gâteau" prend le
+                                // relais dès que cette activité se termine (cas 1/2/3 : la puce d'activité
+                                // disparaît, seul le gâteau reste, tant qu'elle n'est pas encore finie les deux
+                                // sont affichées l'une après l'autre).
+                                if (remainingMs > 0 && !t.dismissed) {
+                                    entries.push({ kind: 'activity', endTime: t.endTime, name: bd.name, label: t.label, type: t.type });
+                                }
+                                entries.push({ kind: 'gateau', endTime: t.endTime, name: bd.name, bdId: bd.id });
+                            } else if (!t.dismissed) {
+                                entries.push({ kind: 'activity', endTime: t.endTime, name: bd.name, label: t.label, type: t.type });
+                            }
+                        });
+
+                        buildLaserReminderEntries(bd, now).forEach(entry => entries.push(entry));
+                    });
+
+                    // Tri par heure de fin ; le gâteau est réglé +0.5ms pour rester juste après
+                    // l'activité qui le déclenche quand les deux partagent le même endTime.
+                    entries.sort((a, b) => (a.endTime + (a.kind === 'gateau' ? 0.5 : 0)) - (b.endTime + (b.kind === 'gateau' ? 0.5 : 0)));
+
+                    bdayEntries = entries;
+                    buildBdayTimeline();
+                }
+            );
+        }
+        if (!tickInterval) {
+            render();
+            tickInterval = setInterval(render, 250);
+        }
+    } else {
+        authScreen.style.display = 'flex';
+        chronoScreen.style.display = 'none';
+        authStatus.textContent = "Connexion requise pour afficher les chronos.";
+        loginBtn.style.display = 'block';
+    }
+});
+
+// Valider le gâteau directement depuis l'écran chrono (clic sur la tuile).
+bdayTrack.addEventListener('click', (e) => {
+    const item = e.target.closest('.bday-item.gateau');
+    if (!item) return;
+    const bdId = item.dataset.bdId;
+    if (!bdId) return;
+    item.style.pointerEvents = 'none';
+    updateDoc(doc(db, "dailyBirthdays", bdId), { "checklist.cake": true }).catch(err => {
+        console.error("Erreur validation gâteau", err);
+        item.style.pointerEvents = '';
+    });
+});
+
+function formatBdayRemaining(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return m > 0 ? `${m}m${String(s).padStart(2, '0')}` : `${s}s`;
+}
+
+function renderBdayEntryHtml(entry, isFirst) {
+    const nextCls = isFirst ? ' next' : '';
+    const chevron = isFirst ? '' : '<span class="bday-chevron">›</span>';
+    if (entry.kind === 'gateau') {
+        return chevron +
+            `<div class="bday-item gateau${nextCls}" data-role="gateau" data-endtime="${entry.endTime}" data-bd-id="${escHtml(entry.bdId)}">` +
+            `<div class="bday-tile-head">` +
+            `${bdayNameSpanHtml(entry.name)}` +
+            `<span class="bday-activity">🎂 Gâteau</span>` +
+            `</div>` +
+            `<span class="bday-time">--</span>` +
+            `<span class="bday-gateau-hint">✓ Valider</span>` +
+            `</div>`;
+    }
+    if (entry.kind === 'laser-reminder') {
+        return chevron +
+            `<div class="bday-item laser-reminder${nextCls}" data-role="laser-reminder" data-endtime="${entry.endTime}">` +
+            `<div class="bday-tile-head">` +
+            `${bdayNameSpanHtml(entry.name)}` +
+            `<span class="bday-activity">🔜 ${escHtml(entry.label)} (pause)</span>` +
+            `</div>` +
+            `<span class="bday-time">--</span>` +
+            `</div>`;
+    }
+    return chevron +
+        `<div class="bday-item ${escHtml(entry.type)}${nextCls}" data-role="activity" data-endtime="${entry.endTime}">` +
+        `<div class="bday-tile-head">` +
+        `${bdayNameSpanHtml(entry.name)}` +
+        `<span class="bday-activity">${escHtml(entry.label)}</span>` +
+        `</div>` +
+        `<span class="bday-time">--</span>` +
+        `</div>`;
+}
+
+// Ne garde qu'UNE seule ligne de tuiles anniversaire : si tout ne rentre pas, on retire des
+// tuiles depuis la fin et on les remplace par une tuile récap "+N à venir" (plutôt qu'une 2e
+// ligne ou une barre de scroll) — le texte des tuiles restantes reste grand et lisible.
+function fitBdayRow() {
+    if (bdayTrack.scrollWidth <= bdayTrack.clientWidth + 1) return; // tout rentre déjà
+
+    const chevron = document.createElement('span');
+    chevron.className = 'bday-chevron';
+    chevron.textContent = '›';
+    const moreTile = document.createElement('div');
+    moreTile.className = 'bday-item bday-more';
+
+    let hiddenCount = 0;
+    function updateMoreTile() {
+        moreTile.innerHTML = `<div class="bday-time">+${hiddenCount}</div><span class="bday-activity">à venir</span>`;
+    }
+    updateMoreTile();
+    bdayTrack.appendChild(chevron);
+    bdayTrack.appendChild(moreTile);
+
+    // Retire des tuiles réelles juste avant [chevron, moreTile] jusqu'à ce que tout rentre.
+    while (bdayTrack.scrollWidth > bdayTrack.clientWidth && bdayTrack.children.length > 2) {
+        const reservedChevron = moreTile.previousElementSibling;
+        const target = reservedChevron ? reservedChevron.previousElementSibling : null;
+        if (!target) break;
+        if (target.classList.contains('bday-item')) {
+            hiddenCount++;
+            target.remove();
+            const precedingChevron = reservedChevron.previousElementSibling;
+            if (precedingChevron && precedingChevron.classList.contains('bday-chevron')) precedingChevron.remove();
+        } else {
+            target.remove();
+        }
+        updateMoreTile();
+    }
+}
+
+// Réduit la police d'un texte de tuile tant qu'il déborde de sa largeur disponible, au lieu
+// de le tronquer avec "..." -- jusqu'à un plancher qui reste lisible.
+function shrinkTextToFit(el, minPx) {
+    if (!el) return;
+    el.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    let guard = 0;
+    while (el.scrollWidth > el.clientWidth + 1 && size > minPx && guard < 40) {
+        size -= 1;
+        el.style.fontSize = size + 'px';
+        guard++;
+    }
+}
+
+// Applique le rétrécissement aux prénoms (1 ou 2 lignes) et aux titres d'activité des tuiles
+// anniversaire actuellement affichées.
+function autoFitBdayText() {
+    bdayTrack.querySelectorAll('.bday-name-line').forEach(el => shrinkTextToFit(el, 13));
+    bdayTrack.querySelectorAll('.bday-name:not(.two-line)').forEach(el => shrinkTextToFit(el, 15));
+    bdayTrack.querySelectorAll('.bday-activity').forEach(el => shrinkTextToFit(el, 11));
+}
+
+// Reconstruit la grille (tuiles + visibilité) quand la liste des anniversaires change.
+// Le texte des compteurs est ensuite rafraîchi à chaque tick par render(), sans tout reconstruire.
+function buildBdayTimeline() {
+    if (!bdayEntries.length) {
+        bdayWrapper.classList.remove('show');
+        bdayTrack.innerHTML = '';
+        return;
+    }
+    bdayWrapper.classList.add('show');
+    bdayTrack.innerHTML = bdayEntries.map((entry, i) => renderBdayEntryHtml(entry, i === 0)).join('');
+    fitBdayRow();
+    autoFitBdayText();
+}
+
+function render() {
+    const running = [1, 2, 3, 4].filter(r => timers[r] && timers[r].isCountingDown && timers[r].endTime);
+
+    empty.style.display = running.length ? 'none' : 'flex';
+    grid.style.display = running.length ? 'grid' : 'none';
+    grid.style.gridTemplateColumns = running.length <= 1 ? '1fr' : '1fr 1fr';
+    if (!running.length) empty.textContent = 'Aucun chrono en cours.';
+
+    const present = new Set(running.map(String));
+    Array.from(grid.children).forEach(tile => {
+        if (!present.has(tile.dataset.room)) tile.remove();
+    });
+
+    running.forEach(room => {
+        let tile = grid.querySelector('.pip-tile[data-room="' + room + '"]');
+        if (!tile) {
+            tile = document.createElement('div');
+            tile.className = 'pip-tile';
+            tile.dataset.room = String(room);
+            const t = document.createElement('div'); t.className = 'pip-title';
+            const v = document.createElement('div'); v.className = 'pip-time'; v.textContent = '00:00';
+            tile.appendChild(t); tile.appendChild(v);
+            grid.appendChild(tile);
+        }
+        const titleEl = tile.querySelector('.pip-title');
+        const wantTitle = timers[room].title || shortTitles[room];
+        if (titleEl.dataset.html !== wantTitle) {
+            titleEl.innerHTML = wantTitle;
+            titleEl.dataset.html = wantTitle;
+        }
+        const diffMs = timers[room].endTime - Date.now();
+        const isNeg = diffMs < 0;
+        const absMs = Math.abs(diffMs);
+        const mm = Math.floor(absMs / 60000);
+        const ss = Math.floor((absMs % 60000) / 1000);
+        const txt = (isNeg ? '-' : '') + String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+        const timeEl = tile.querySelector('.pip-time');
+        if (timeEl.textContent !== txt) timeEl.textContent = txt;
+        tile.classList.toggle('warn', !isNeg && absMs <= 60000);
+        tile.classList.toggle('ended', isNeg);
+    });
+
+    if (!billardQueue.length) {
+        billardEl.classList.remove('show');
+        billardEl.innerHTML = '';
+    } else {
+        billardEl.classList.add('show');
+        billardEl.innerHTML = '<div id="pip-billard-title">🎱 Attente billard (' + billardQueue.length + ')</div>' +
+            billardQueue.map(item => '<div class="pip-billard-item">' + item.name + '</div>').join('');
+    }
+
+    const now = Date.now();
+
+    document.querySelectorAll('#bday-timeline-track .bday-item[data-role="activity"]').forEach(item => {
+        const endTime = parseInt(item.dataset.endtime);
+        if (!endTime) return;
+        const remainingMs = endTime - now;
+        const timeEl = item.querySelector('.bday-time');
+        if (remainingMs <= 0) {
+            timeEl.textContent = 'Terminé';
+            item.classList.add('finished');
+            item.classList.remove('urgent');
+        } else {
+            timeEl.textContent = formatBdayRemaining(remainingMs);
+            item.classList.remove('finished');
+            item.classList.toggle('urgent', remainingMs < 5 * 60000);
+        }
+    });
+
+    document.querySelectorAll('#bday-timeline-track .bday-item[data-role="gateau"]').forEach(item => {
+        const endTime = parseInt(item.dataset.endtime);
+        if (!endTime) return;
+        const remainingMs = endTime - now;
+        const timeEl = item.querySelector('.bday-time');
+        if (remainingMs <= 0) {
+            timeEl.textContent = 'Prêt !';
+            item.classList.add('ready');
+        } else {
+            timeEl.textContent = formatBdayRemaining(remainingMs);
+            item.classList.remove('ready');
+        }
+    });
+
+    document.querySelectorAll('#bday-timeline-track .bday-item[data-role="laser-reminder"]').forEach(item => {
+        const endTime = parseInt(item.dataset.endtime);
+        if (!endTime) return;
+        const remainingMs = endTime - now;
+        const timeEl = item.querySelector('.bday-time');
+        if (remainingMs <= 0) {
+            timeEl.textContent = 'À lancer !';
+            item.classList.add('ready');
+        } else {
+            timeEl.textContent = formatBdayRemaining(remainingMs);
+            item.classList.remove('ready');
+        }
+    });
+}
+</script>
+</body>
+</html>

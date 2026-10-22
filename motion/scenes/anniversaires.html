@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vidéo · Anniversaires</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@500;600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="../kit.css">
+<style>
+/* Présentation des anniversaires, 15 s : le titre, les jeux au choix, le goûter compris, « Réserve ici ».
+   Contenu tiré des formules anniversaire du CRM (Bowling Enfants dès 4 ans, Laser Jeune, Bowling + Laser Game, Quiz Boxing ;
+   gâteau, boissons, bonbons, invitations offertes). Pas de prix : la vidéo ne vieillit pas quand les tarifs changent. */
+.rayons{position:absolute;left:50%;top:46%;width:2600px;height:2600px;margin:-1300px 0 0 -1300px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.05) 0 7deg,transparent 7deg 18deg);animation:tourne 40s linear infinite;-webkit-mask:radial-gradient(closest-side,#000 30%,transparent);mask:radial-gradient(closest-side,#000 30%,transparent)}
+.sous{font:600 66px var(--txt);color:var(--sky2);letter-spacing:.03em}
+/* « ANNIV' », « ici ! » : lettres dorées, ombre rouge */
+.or .l{background:linear-gradient(180deg,#fff2b0 0%,var(--jaune) 42%,#ff8a3d 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 16px 0 var(--rouge)) drop-shadow(0 30px 40px rgba(0,0,0,.45));padding:0 4px}
+/* plan 2 : les jeux */
+.carte{position:absolute;left:90px;width:900px;height:220px;border-radius:40px;background:var(--creme);display:flex;align-items:center;gap:36px;padding:0 40px;color:var(--n);box-shadow:0 26px 60px rgba(0,0,0,.35)}
+.carte .ico{flex:none;width:150px;height:150px;border-radius:50%;display:grid;place-items:center;font-size:88px;background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--c) 55%,#fff),var(--c))}
+.carte .ico.duo{font-size:56px;letter-spacing:-8px}
+.carte b{display:block;white-space:nowrap;font:700 88px/1 var(--cond);text-transform:uppercase}
+.carte small{display:block;font:600 38px var(--txt);color:#5b6b78;margin-top:8px}
+.gauche{animation:glisseG .8s var(--rebond) var(--a) both}.droite{animation:glisseD .8s var(--rebond) var(--a) both}
+@keyframes glisseG{from{opacity:0;transform:translateX(-1200px) rotate(-8deg)}to{opacity:1;transform:rotate(-2deg)}}
+@keyframes glisseD{from{opacity:0;transform:translateX(1200px) rotate(8deg)}to{opacity:1;transform:rotate(2deg)}}
+.etoile{position:absolute;width:250px;height:250px;display:grid;place-items:center;animation:pop .7s var(--rebond) var(--a) both}
+.etoile::before{content:'';position:absolute;inset:0;background:var(--jaune);clip-path:polygon(50% 0,59% 18%,79% 9%,77% 30%,98% 33%,84% 50%,98% 67%,77% 70%,79% 91%,59% 82%,50% 100%,41% 82%,21% 91%,23% 70%,2% 67%,16% 50%,2% 33%,23% 30%,21% 9%,41% 18%);animation:tourne 12s linear infinite;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.etoile span{position:relative;font:700 66px/.9 var(--cond);color:var(--n);text-transform:uppercase;text-align:center;rotate:-12deg}
+/* plan 3 : le gâteau */
+.gateau{position:absolute;left:540px;top:1270px;animation:chute 1s cubic-bezier(.3,1.25,.5,1) var(--a) both}
+.gateau>*{position:absolute;left:0;translate:-50% 0}
+.assiette{top:-40px;width:680px;height:90px;border-radius:50%;background:radial-gradient(ellipse at 50% 35%,#fff,#d8e4ec);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.etage{border-radius:30px 30px 22px 22px;overflow:hidden}
+.e1{top:-250px;width:560px;height:230px;background:linear-gradient(90deg,#d42a68,#ff5c95 40%,#ff3d7f 60%,#c21f5c)}
+.e2{top:-420px;width:400px;height:190px;background:linear-gradient(90deg,#f3dcc6,#fff6ea 40%,#fdebd8 60%,#e9cdb2)}
+.e1::before,.e2::before{content:'';position:absolute;left:0;right:0;top:0;height:70px;background:radial-gradient(circle at 50% 100%,var(--glace) 34px,transparent 35px) 0 0/70px 70px repeat-x,linear-gradient(var(--glace),var(--glace)) 0 0/100% 36px no-repeat}
+.e1{--glace:#fffdf9}.e2{--glace:#ff3d7f}
+.e1::after{content:'';position:absolute;left:0;right:0;bottom:46px;height:16px;background:repeating-linear-gradient(90deg,#fff 0 22px,transparent 22px 44px);opacity:.6}
+.bougies{top:-560px;width:260px;height:150px;display:flex;justify-content:space-between}
+.bougie{position:relative;width:28px;height:140px;margin-top:10px;border-radius:6px;background:repeating-linear-gradient(-35deg,#fff 0 14px,var(--sky) 14px 28px)}
+.bougie:nth-child(2){margin-top:0;height:150px}
+.bougie::before{content:'';position:absolute;left:50%;top:-74px;width:40px;height:66px;margin-left:-20px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(circle at 50% 70%,#fff 0 18%,#ffe27a 30%,#ff9a2e 70%,transparent 72%);transform-origin:50% 90%;filter:drop-shadow(0 0 22px #ffb84d);animation:flamme .5s ease-in-out infinite;animation-delay:calc(var(--i) * -.17s)}
+@keyframes chute{0%{opacity:0;transform:translateY(-1500px)}55%{opacity:1;transform:translateY(0) scale(1.06,.92)}75%{transform:translateY(-30px) scale(.98,1.03)}100%{opacity:1;transform:none}}
+.puce{display:inline-flex;align-items:center;gap:12px;background:var(--creme);color:var(--n);font:700 48px/1 var(--cond);text-transform:uppercase;padding:18px 28px;border-radius:99px;box-shadow:0 14px 30px rgba(0,0,0,.3)}
+.ruban{position:absolute;left:30px;right:30px;top:1420px;background:var(--rouge);color:var(--creme);font:700 70px/1 var(--cond);text-transform:uppercase;text-align:center;padding:24px 0 26px;rotate:-3deg;box-shadow:0 18px 40px rgba(0,0,0,.35);animation:ruban .7s var(--ease) var(--a) both}
+.ruban small{display:block;font-size:54px;color:var(--jaune);margin-top:8px}
+@keyframes ruban{from{opacity:0;transform:translateX(110%)}to{opacity:1;transform:none}}
+/* plan 4 : réserve ici */
+.logo{width:560px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.5))}
+.flotte{animation:flotte 3s ease-in-out infinite}
+.main{position:relative;width:230px;height:230px;display:grid;place-items:center}
+.main svg{width:180px;height:180px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;rotate:180deg;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4))}
+.main i{position:absolute;inset:0;border-radius:50%;border:6px solid var(--sky);opacity:0;animation:pulse 1.3s ease-out var(--a) infinite}
+.main i+i{animation-delay:calc(var(--a) + .65s)}
+</style>
+</head>
+<body data-duree="15">
+<div class="cadre"><div id="scene">
+  <div class="fond"><div class="rayons"></div><span class="lueur" style="width:900px;height:900px;left:-380px;top:120px;background:#ff3d7f;opacity:.28"></span><span class="lueur" style="width:800px;height:800px;right:-360px;top:900px;background:#00aee0;opacity:.32;animation-delay:-4s"></span></div>
+  <div class="ciel" id="ciel"></div>
+  <div id="ballons"></div>
+
+  <!-- 1. Fête ton ANNIV' (0 → 2,5 s) -->
+  <div class="plan" style="--a:0s;--b:2.45s">
+    <span class="onde" style="left:540px;top:900px;--c:var(--rose);--a:0.05s"></span><span class="onde" style="left:540px;top:900px;--c:var(--sky);--a:0.22s"></span><span class="onde" style="left:540px;top:900px;--c:var(--jaune);--a:0.4s"></span>
+    <div class="centre" style="top:560px">
+      <span class="masque"><b class="titre" style="--fs:140px;--a:0.25s">Fête ton</b></span>
+      <div class="titre or" style="--fs:350px;--a:0.45s;margin-top:10px;white-space:nowrap" data-lettres>Anniv'</div>
+      <p class="sous monte" style="--a:1.1s;margin-top:40px">au Space Bowling</p>
+    </div>
+  </div>
+
+  <!-- 2. Les formules au choix (2,65 → 8,25 s : le temps de lire) -->
+  <div class="plan" style="--a:2.65s;--b:8.25s">
+    <div class="centre" style="top:230px"><span class="masque"><b class="titre" style="--fs:104px;--a:2.7s;white-space:nowrap">Choisis ta formule</b></span></div>
+    <div class="carte gauche" style="top:440px;--a:2.85s"><span class="ico" style="--c:#2f5fd0">🎳</span><div><b>Bowling</b><small>Avec les Mad Games interactifs</small></div></div>
+    <div class="carte droite" style="top:680px;--a:3.05s"><span class="ico duo" style="--c:#7c3aed">🎳🎯</span><div><b style="font-size:76px">Bowling + Laser</b><small>Une partie de chaque</small></div></div>
+    <div class="carte gauche" style="top:920px;--a:3.25s"><span class="ico" style="--c:#c2410c">🎯</span><div><b>Laser Game</b><small>2 parties de 20 min</small></div></div>
+    <div class="carte droite" style="top:1160px;--a:3.45s"><span class="ico" style="--c:#a16207">🥊</span><div><b>Quiz Boxing</b><small>Dès 12 ans</small></div></div>
+    <div class="etoile" style="left:740px;top:1340px;--a:3.9s;width:270px;height:270px"><span>Dès<br>4 ans</span></div>
+  </div>
+
+  <!-- 3. Le goûter compris (8,45 → 12,6 s) -->
+  <div class="plan" style="--a:8.45s;--b:12.6s">
+    <div class="centre" style="top:200px">
+      <span class="masque"><b class="titre" style="--fs:150px;--a:8.5s">Le goûter</b></span>
+      <span class="masque"><b class="titre" style="--fs:150px;--a:8.7s;color:var(--jaune)">est compris !</b></span>
+    </div>
+    <div class="gateau" style="--a:8.65s;top:1210px"><div class="assiette"></div><div class="etage e1"></div><div class="etage e2"></div><div class="bougies"><span class="bougie" style="--i:0"></span><span class="bougie" style="--i:1"></span><span class="bougie" style="--i:2"></span></div></div>
+    <div class="centre" style="top:1290px;flex-direction:row;justify-content:center;gap:16px">
+      <span class="puce pop" style="--a:9.35s">🍰 Gâteau</span><span class="puce pop" style="--a:9.5s">🥤 Boissons</span><span class="puce pop" style="--a:9.65s">🍬 Bonbons</span>
+    </div>
+    <div class="ruban" style="--a:10.05s">Invitations téléchargeables<small>gratuitement !</small></div>
+  </div>
+
+  <!-- 4. Réserve ici (12,8 → 15 s) -->
+  <div class="plan" style="--a:12.8s;--b:99s">
+    <div class="centre" style="top:170px"><div class="pop" style="--a:12.85s"><img class="logo flotte" src="../../logo.png" alt=""></div></div>
+    <div class="centre" style="top:780px">
+      <span class="masque"><b class="titre" style="--fs:122px;--a:13.05s;white-space:nowrap">Réserve ta fête</b></span>
+      <div class="titre or" style="--fs:330px;--a:13.3s;margin-top:4px;white-space:nowrap" data-lettres>ici !</div>
+    </div>
+    <div class="centre" style="top:1370px"><div class="main pop" style="--a:13.8s"><i style="--a:13.9s"></i><i style="--a:13.9s"></i><svg viewBox="0 0 24 24"><path d="M9 11V5a1.5 1.5 0 013 0v5M12 10V4a1.5 1.5 0 013 0v6M15 10V6.5a1.5 1.5 0 013 0V14c0 4-2.5 7-6 7-3 0-4.5-1.5-6-4l-2-3.5a1.5 1.5 0 012.5-1.6L9 14"/></svg></div></div>
+  </div>
+  <!-- volets entre les plans, au-dessus de tout -->
+  <span class="volet" style="--c:var(--rose);--a:2.15s"></span>
+  <span class="volet" style="--c:var(--sky);--a:7.95s"></span>
+  <span class="volet" style="--c:var(--jaune);--a:12.3s"></span>
+  <div id="confettis"></div>
+</div></div>
+<script src="../kit.js"></script>
+<script>
+  document.querySelectorAll('[data-lettres]').forEach(KIT.lettres);
+  KIT.etoiles(document.getElementById('ciel'), 80);
+  KIT.ballons(document.getElementById('ballons'), [[30, -1.2, 8.5, '#ff3d7f', 1.1], [880, .3, 9, '#00aee0', 1], [150, 1.8, 9.5, '#f5c542', .8], [900, 3.4, 8, '#d9272e', .9], [-30, 4.6, 9, '#00aee0', .95], [770, 5.9, 8.5, '#ff3d7f', .85], [260, 7.3, 9, '#f5c542', .75], [860, 8.6, 8.5, '#00aee0', .9], [40, 9.8, 9, '#d9272e', .85], [700, 10.9, 9, '#f5c542', .8], [120, 12, 8.5, '#ff3d7f', .9], [840, 13.1, 9, '#00aee0', .85]]);
+  const C = document.getElementById('confettis');
+  KIT.confettis(C, 110, { x: 540, y: 920, a: 0.5 });
+  KIT.confettis(C, 50, { x: 540, y: 660, a: 9.1 });
+  KIT.confettis(C, 120, { x: 540, y: 1050, a: 13.2 });
+</script>
+</body>
+</html>

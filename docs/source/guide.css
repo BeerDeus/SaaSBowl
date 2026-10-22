@@ -1,0 +1,99 @@
+/* Mise en page commune des guides PDF (A4) */
+@page { size: A4; margin: 15mm 15mm 17mm; }
+@page :first { margin: 0; }
+:root { --n: #0c2f47; --sky: #00aee0; --creme: #f6f1e7; --orange: #e8590c; --doux: #5b6b78; --ligne: #dcd5c8; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font: 400 10.5pt/1.5 'Barlow', Arial, sans-serif; color: #1d2b36; }
+h1, h2, h3 { font-family: 'Barlow Semi Condensed', 'Barlow', sans-serif; text-transform: uppercase; letter-spacing: .02em; color: var(--n); margin: 0; }
+p { margin: 0 0 7px; }
+b { font-weight: 600; color: var(--n); }
+
+/* couverture */
+.couverture { height: 297mm; background: var(--n); color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 22mm 20mm; page-break-after: always; position: relative; overflow: hidden; }
+.couverture::after { content: ''; position: absolute; right: -60mm; bottom: -60mm; width: 170mm; height: 170mm; border-radius: 50%; border: 18mm solid rgba(0, 174, 224, .16); }
+.c-haut { display: flex; align-items: center; justify-content: space-between; }
+.c-haut img { height: 30mm; }
+.c-haut span, .c-bas span { font: 600 9pt 'Barlow', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #9fd9ee; }
+.c-sur { font: 700 12pt 'Barlow Semi Condensed', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--sky); margin-bottom: 4mm; }
+.couverture h1 { color: #fff; font-size: 44pt; line-height: .95; max-width: 150mm; }
+.couverture h1::after { content: ''; display: block; width: 26mm; height: 2.2mm; background: var(--sky); margin-top: 7mm; }
+.c-sous { font-size: 13pt; color: #d6e6ef; max-width: 140mm; margin-top: 7mm; line-height: 1.45; }
+.c-sous b { color: #fff; }
+.c-bas { display: flex; justify-content: space-between; position: relative; z-index: 1; }
+
+/* sommaire */
+.sommaire { page-break-after: always; }
+.sommaire h2 { font-size: 20pt; margin-bottom: 5mm; }
+.sommaire .intro { background: var(--creme); border-radius: 2mm; padding: 4mm 5mm; margin-bottom: 8mm; font-size: 11pt; }
+.sommaire .intro p:last-child { margin: 0; }
+.sommaire ol { list-style: none; padding: 0; margin: 0 0 9mm; }
+.sommaire li { display: flex; align-items: center; gap: 4mm; padding: 1.7mm 0; border-bottom: 1px solid var(--ligne); font: 600 12pt 'Barlow', sans-serif; color: var(--n); }
+.sommaire li a { display: flex; align-items: center; gap: 4mm; color: inherit; text-decoration: none; width: 100%; }
+.sommaire li span { width: 7.5mm; height: 7.5mm; border-radius: 50%; background: var(--n); color: #fff; display: inline-flex; align-items: center; justify-content: center; font: 700 11pt 'Barlow Semi Condensed', sans-serif; flex: none; }
+.sommaire p { color: var(--doux); }
+
+/* chapitres */
+.chap { margin-top: 11mm; }
+.sommaire + .chap { page-break-before: always; margin-top: 0; }
+.chap header { break-after: avoid; display: flex; align-items: center; gap: 4mm; border-bottom: 2.2px solid var(--n); padding-bottom: 3mm; margin-bottom: 5mm; }
+.chap header .n { font: 700 26pt/1 'Barlow Semi Condensed', sans-serif; color: var(--sky); }
+.chap header h2 { font-size: 19pt; line-height: 1.05; }
+.chapeau { font-size: 11.5pt; color: var(--doux); margin-bottom: 5mm; }
+h3 { font-size: 13pt; margin: 6mm 0 2.5mm; break-after: avoid; }
+ul, ol { margin: 0 0 7px; padding-left: 5mm; }
+li { margin-bottom: 2px; }
+
+/* étapes « faites ceci » */
+ol.etapes { list-style: none; padding: 0; counter-reset: e; margin: 2mm 0 4mm; }
+ol.etapes li { counter-increment: e; position: relative; padding: 1.6mm 0 1.6mm 9mm; }
+ol.etapes li::before { content: counter(e); position: absolute; left: 0; top: 1.4mm; width: 6mm; height: 6mm; border-radius: 1.4mm; background: var(--n); color: #fff; font: 700 9pt/6mm 'Barlow Semi Condensed', sans-serif; text-align: center; }
+
+/* captures */
+figure { margin: 3mm 0 3mm; break-inside: avoid; }
+figure img { display: block; max-width: 100%; max-height: 150mm; margin: 0 auto; border: 1px solid var(--ligne); border-radius: 2mm; box-shadow: 0 1.2mm 3mm rgba(12, 47, 71, .12); }
+figure.petite img { max-width: 48%; }
+.etape, .debut { break-inside: avoid; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; break-inside: avoid; }
+.duo figure.petite img { max-width: 100%; max-height: 120mm; }
+.duo ol.reperes { grid-template-columns: 1fr; }
+.chapeau { break-after: avoid; }
+.manque { border: 1.5px dashed var(--ligne); border-radius: 2mm; padding: 14mm; text-align: center; color: var(--doux); font-style: italic; }
+figcaption { font-size: 9pt; color: var(--doux); text-align: center; margin-top: 2mm; font-style: italic; }
+
+/* repères numérotés sous une capture */
+ol.reperes { list-style: none; padding: 0; margin: 1mm 0 5mm; display: grid; grid-template-columns: 1fr 1fr; column-gap: 7mm; row-gap: 2.2mm; }
+ol.reperes li { display: flex; gap: 2.6mm; align-items: flex-start; margin: 0; break-inside: avoid; font-size: 10pt; line-height: 1.4; }
+ol.reperes .num { flex: none; width: 5.6mm; height: 5.6mm; border-radius: 50%; background: var(--orange); color: #fff; font: 700 9pt/5.6mm 'Barlow', sans-serif; text-align: center; margin-top: .2mm; }
+
+/* encadrés */
+.encadre { border-left: 1.4mm solid var(--sky); background: #eef8fc; padding: 3mm 4mm; margin: 3mm 0 5mm; border-radius: 0 2mm 2mm 0; break-inside: avoid; }
+.encadre > b { display: block; font: 700 10pt 'Barlow Semi Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 1mm; }
+.encadre p { margin: 0 0 3px; }
+.encadre.attention { border-color: var(--orange); background: #fdf1ea; }
+.encadre.exemple { border-color: var(--n); background: var(--creme); }
+
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9.6pt; break-inside: avoid; }
+th { text-align: left; font: 700 8.6pt 'Barlow Semi Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--n); border-bottom: 2px solid var(--n); padding: 1.6mm 2mm; }
+td { border-bottom: 1px solid var(--ligne); padding: 1.8mm 2mm; vertical-align: top; }
+.saut { page-break-after: always; }
+
+/* tableaux « les options » : ce que fait chaque choix */
+.options { break-inside: avoid; margin: 1mm 0 5mm; }
+.options .o-titre { font: 700 10pt 'Barlow Semi Condensed', sans-serif; text-transform: uppercase; letter-spacing: .06em; color: var(--n); margin: 0 0 1mm; }
+.options table { margin: 0; }
+.options td:first-child { width: 28%; }
+.options td:nth-child(3) { width: 27%; color: var(--doux); }
+/* renvoi vers un autre guide */
+.encadre.renvoi { border-color: var(--orange); background: #fff7f1; }
+
+/* dernière page : la collection des guides */
+.collection { page-break-before: always; }
+.collection h2 { font-size: 20pt; margin-bottom: 3mm; }
+.collection ol { list-style: none; padding: 0; margin: 4mm 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+.collection li { border-left: 1.4mm solid var(--ligne); padding: 2.2mm 3.5mm; margin: 0; background: #fbf9f4; break-inside: avoid; }
+.collection li.ici { border-color: var(--sky); background: #eef8fc; }
+.collection li > b { font: 700 12pt 'Barlow Semi Condensed', sans-serif; text-transform: uppercase; letter-spacing: .03em; }
+.collection li span { color: var(--doux); font-size: 9pt; }
+.collection li small { display: block; color: #33434f; font-size: 9.6pt; margin-top: 1mm; }
+.collection li em { display: block; font-style: normal; color: var(--doux); font-size: 8.6pt; margin-top: 1mm; }

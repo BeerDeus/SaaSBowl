@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Commandes Anniversaire</title>
+    <link rel="stylesheet" href="styles.css?v=5">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#007bff">
+</head>
+<body>
+
+    <div id="login-section">
+        <h1>Gestion des Commandes</h1>
+        <p>Veuillez vous connecter pour continuer</p>
+        <button id="login-btn">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" width="20">
+            <span>Se connecter avec Google</span>
+        </button>
+    </div>
+
+    <div id="app-section" class="hidden">
+        <header>
+            <div class="header-left">
+                <div id="user-info">
+                    <img id="user-pic" src="" alt="Photo de profil">
+                    <span id="user-name"></span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="kiosk-mode-btn" class="header-icon-btn" aria-label="Mode kiosque" aria-pressed="false" title="Mode kiosque : plein écran, validation rapide des commandes">
+                    <span class="material-icons" aria-hidden="true">tv</span>
+                </button>
+                <!-- NOUVEAU : reste visible en mode kiosque (volontairement absent de la liste masquée
+                     .kiosk-mode ... { display:none !important; } dans styles.css) -- garde l'écran utile
+                     même sans commande anniversaire en attente en basculant sur le Monitoring Bar. -->
+                <button id="kiosk-bar-monitor-btn" class="header-icon-btn" aria-label="Monitoring Bar" title="Monitoring Bar : commandes bar en cours">
+                    <span class="material-icons" aria-hidden="true">sports_bar</span>
+                </button>
+                <button id="stock-management-btn" class="header-icon-btn hidden" aria-label="Gérer les stocks" title="Gérer les stocks">
+                    <span class="material-icons" aria-hidden="true">inventory_2</span>
+                </button>
+                <button id="admin-users-btn" class="header-icon-btn hidden" aria-label="Gérer les utilisateurs" title="Gérer les utilisateurs">
+                    <span class="material-icons" aria-hidden="true">group</span>
+                </button>
+                <button id="logout-btn" class="header-icon-btn" aria-label="Déconnexion" title="Déconnexion">
+                    <span class="material-icons" aria-hidden="true">exit_to_app</span>
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <h2>Commandes en cours</h2>
+            <div id="orders-grid"></div>
+        </main>
+
+        <button id="add-order-btn" class="fab hidden">
+            <span class="material-icons">add</span>
+        </button>
+
+        <button id="add-reassort-btn" class="fab fab-left hidden">
+            <span class="material-icons">local_shipping</span>
+            <span id="reassort-badge" class="fab-badge hidden">0</span>
+        </button>
+
+        <!-- NOUVEAU : vue plein écran affichée par-dessus le kiosque au clic sur le bouton 🍹
+             ci-dessus -- même liste de commandes bar (avec effacement ✕ par commande) que le
+             "Monitoring Bar" du site principal, en autonome (simple fetch, pas de dépendance
+             Firestore du site principal puisque ce waiterio tourne sur un projet Firebase séparé). -->
+        <div id="kiosk-bar-monitor-view" class="kiosk-bar-monitor-view hidden">
+            <div class="kiosk-bar-monitor-header">
+                <h2>🍹 Monitoring Bar</h2>
+                <button type="button" id="kiosk-bar-monitor-back-btn" aria-label="Retour">
+                    <span class="material-icons" aria-hidden="true">arrow_back</span>
+                </button>
+            </div>
+            <div id="kiosk-bar-monitor-list" class="kiosk-bar-monitor-list"></div>
+        </div>
+    </div>
+
+    <div id="add-order-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Nouvelle Commande</h3>
+            <form id="add-order-form">
+                <input type="text" id="child-name-input" placeholder="Prénom de l'enfant" required>
+                <p id="total-drinks-display">Total : 0</p>
+                
+                <div id="drink-tabs-container">
+                    <div id="drink-tab-buttons"></div>
+                    <div id="drink-tab-panels"></div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel">Annuler</button>
+                    <button type="submit">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div id="view-order-modal" class="modal-overlay hidden">
+        <div class="modal-content"> 
+            <div class="modal-header">
+                <h3 id="view-modal-title">Détails de la commande</h3>
+                <button type="button" id="edit-order-btn" class="btn-edit">Modifier</button>
+            </div>
+            <div id="view-modal-body"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel">Fermer</button>
+                <button type="button" id="delete-order-btn" class="danger">Supprimer la commande</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-delete-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Confirmer la suppression</h3>
+            <p>Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel">Annuler</button>
+                <button type="button" id="confirm-delete-btn" class="danger">Confirmer la suppression</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-users-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Liste des utilisateurs</h3>
+            <div id="users-list-container">
+                </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stock-management-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Gestion des stocks</h3>
+            <div id="stock-list-container">
+                </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reassort-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reassort-modal-title">
+        <div class="modal-content reassort-modal-content">
+            <div class="reassort-topbar">
+                <button type="button" class="btn-cancel reassort-close-btn" aria-label="Fermer le réassort">
+                    <span class="material-icons" aria-hidden="true">close</span>
+                </button>
+                <h3 id="reassort-modal-title">Réassort du soir</h3>
+                <button type="button" id="reassort-history-btn" class="btn-edit">Historique</button>
+            </div>
+
+            <div id="reassort-active-view" class="reassort-view">
+                <div id="reassort-list" class="reassort-list" aria-label="Articles à récupérer">
+                    <p class="reassort-empty">Aucun article pour l'instant.</p>
+                </div>
+            </div>
+
+            <div id="reassort-history-view" class="reassort-view hidden">
+                <div id="reassort-history-list">
+                    <p class="reassort-empty">Chargement...</p>
+                </div>
+            </div>
+
+            <div id="reassort-action-bar" class="reassort-action-bar">
+                <button type="button" id="reassort-clear-done-btn" class="btn-edit hidden">Vider les récupérés</button>
+                <button type="submit" id="reassort-finish-btn">Finir</button>
+            </div>
+
+            <div class="reassort-search-bar">
+                <div class="reassort-search-wrap">
+                    <span class="material-icons reassort-search-icon" aria-hidden="true">search</span>
+                    <input type="text" id="reassort-search-input" inputmode="search" enterkeyhint="done"
+                           placeholder="Chercher ou ajouter un article..." autocomplete="off"
+                           aria-label="Rechercher ou ajouter un article à récupérer">
+                    <div id="reassort-suggestions" class="reassort-suggestions hidden" role="listbox" aria-label="Suggestions d'articles"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, addDoc, serverTimestamp, deleteDoc, query, orderBy, getDocs, updateDoc, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmEzUp7iTllPhNI3X4yf0M-0phKgz47Es",
+            authDomain: "questoria-2459c.firebaseapp.com",
+            projectId: "questoria-2459c",
+            storageBucket: "questoria-2459c.appspot.com", // J'ai corrigé une faute de frappe ici
+            messagingSenderId: "784834017736",
+            appId: "1:784834017736:web:9325ca8ade1c13368868fd",
+            measurementId: "G-SBDRYHXG61",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // On expose les outils Firebase à l'échelle globale pour que script.js y accède
+        window.firebaseTools = {
+            auth, db, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut,
+            doc, setDoc, getDoc, onSnapshot, collection, addDoc, serverTimestamp,
+            deleteDoc, query, orderBy,
+            getDocs, // Ajouté
+            updateDoc,
+            writeBatch, // Ajouté
+            increment
+        };
+    </script>
+    
+    <script src="script.js?v=5"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    </script>
+
+</body>
+</html>

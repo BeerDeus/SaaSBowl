@@ -1,0 +1,521 @@
+/* --- Réglages Généraux et Affichage des Éléments Mobiles --- */
+body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* On cache la version desktop sur petit écran */
+.container, .notes-panel-container, .settings-btn {
+    display: none !important;
+}
+
+/* Le conteneur mobile prend toute la place */
+#mobile-container {
+    display: block;
+    /* AUGMENTÉ : On ajoute plus d'espace en bas pour les deux barres de navigation */
+    padding: 15px 10px 130px 10px; 
+}
+
+/* Logique d'affichage des vues mobiles */
+.mobile-view {
+    display: none;
+}
+.mobile-view.active {
+    display: block;
+}
+
+
+/* --- Barre de Navigation Principale (tout en bas) --- */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 65px;
+    background-color: #ffffff;
+    /* NOUVEAU : Force l'affichage et gère l'espace "safe area" (barre de balayage iPhone/Android) */
+    display: flex !important;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    /* NOUVEAU : Z-index maximum pour s'assurer qu'aucun menu flottant ne bloque le clic */
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-btn {
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: none;
+    color: #555;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+    border-top: 3px solid transparent;
+}
+
+.mobile-nav-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.mobile-nav-btn.active {
+    color: #e12421;
+    border-top-color: #e12421;
+}
+
+
+/* --- Sous-Navigation (juste au-dessus de la barre principale) --- */
+.mobile-sub-nav {
+    /* NOUVEAU : Positionné en bas, au-dessus de la barre principale */
+    position: fixed;
+    bottom: 65px; /* Hauteur de la barre principale */
+    left: 0;
+    right: 0;
+    z-index: 999;
+
+    display: flex;
+    background-color: #f1f1f1;
+    box-shadow: 0 -1px 5px rgba(0,0,0,0.1);
+}
+
+/* Par défaut, la sous-navigation est cachée */
+.mobile-view .mobile-sub-nav {
+    display: none;
+}
+/* Seule la sous-navigation de la vue active est visible */
+.mobile-view.active .mobile-sub-nav {
+    display: flex;
+}
+
+
+.sub-nav-btn {
+    flex: 1;
+    padding: 12px 5px;
+    font-size: 1em;
+    font-weight: bold;
+    border: none;
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.sub-nav-btn.active {
+    background-color: #fff;
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+
+/* --- Vue Chronos --- */
+#mobile-chronos-view .counters-containerDisplay {
+    flex-direction: column;
+    gap: 15px;
+}
+
+#mobile-chronos-view .counter {
+    width: 100%;
+    min-width: unset;
+    height: auto;
+    padding: 20px;
+    /* AJOUT : Cette propriété force le padding à être inclus DANS la largeur de 100%,
+       ce qui empêche tout débordement et supprime la barre de défilement. */
+    box-sizing: border-box;
+}
+
+#mobile-chronos-view .counter-display {
+    font-size: 3em;
+}
+
+#mobile-chronos-view .counter-controls button {
+    padding: 10px 15px;
+    font-size: 14px;
+}
+#mobile-chronos-view .custom-time-input {
+    padding: 10px;
+    width: 80px;
+}
+
+
+/* --- Vues Calendrier (Laser & QK) --- */
+.mobile-calendar-container .calendar-container {
+    padding: 0;
+    box-shadow: none;
+}
+
+.date-controls {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.rooms-container {
+    flex-direction: column;
+    gap: 0;
+}
+.room {
+    border: none;
+    padding: 10px 0;
+}
+
+/* MODIFIÉ : On passe à une grille de 2 colonnes avec un petit écart */
+.time-slots {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* La magie est ici : deux colonnes de taille égale */
+    gap: 6px; /* On réduit l'écart entre les blocs */
+}
+
+/* NOUVEAU : Style pour chaque bloc horaire */
+.time-slot {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0; /* On gère le padding sur les enfants */
+    min-height: 100px; /* Hauteur minimale pour un affichage propre même si vide */
+    display: flex;
+    flex-direction: column; /* On s'assure que le contenu est bien vertical */
+    overflow: hidden; /* Empêche le contenu de déborder */
+    background-color: #fff;
+}
+
+/* NOUVEAU : Style pour l'en-tête (l'heure) */
+.time-slot-header {
+    font-size: 1em; /* Police légèrement réduite */
+    font-weight: bold;
+    text-align: center;
+    padding: 8px 4px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* NOUVEAU : Style pour la zone d'information (nom, joueurs, etc.) */
+.time-slot-info {
+    font-size: 0.85em; /* Police plus petite pour plus de place */
+    padding: 8px;
+    flex-grow: 1; /* Permet à cette zone de prendre l'espace restant */
+    line-height: 1.4;
+}
+.time-slot-info b {
+    font-size: 1.1em;
+}
+
+
+/* --- NOUVEAU : Couleurs et états des réservations --- */
+
+/* Style de base pour un créneau réservé */
+.time-slot.booked {
+    background-color: #e3f2fd; /* Bleu clair */
+    border-color: #90caf9;
+}
+
+/* Pour les anniversaires */
+.time-slot.anniversaire {
+    background-color: #fff8e1; /* Jaune clair */
+    border-color: #ffd54f;
+}
+
+/* Quand une réservation est payée */
+.time-slot.paid {
+    /* Ajoute une bordure verte épaisse à gauche pour indiquer le paiement */
+    border-left: 5px solid #4CAF50;
+}
+
+/* Créneau fermé manuellement */
+.time-slot.closed {
+    background-image: repeating-linear-gradient(-45deg, #f1f1f1, #f1f1f1 5px, #e9e9e9 5px, #e9e9e9 10px);
+    color: #999;
+}
+
+/* Les boutons sont plus petits sur mobile */
+.reservation-buttons {
+    margin-top: auto;
+    padding: 4px;
+}
+
+.edit-btn, .monte-btn {
+    padding: 4px 8px;
+    font-size: 0.8em;
+}
+
+.paid-checkbox-container {
+    font-size: 0.9em;
+    gap: 4px;
+}
+.monte-btn {
+    margin-left: auto;
+}
+
+/* --- Adaptation des Modals (Pop-ups) --- */
+.modal {
+    /* On aligne le modal en haut pour les petits écrans pour éviter les soucis de clavier */
+    align-items: flex-start;
+    padding-top: 2vh; 
+}
+
+.modal-content {
+    width: 95%;
+    max-height: 90vh; /* Hauteur maximale pour laisser de l'espace */
+    overflow-y: auto; /* Permet de scroller si le contenu dépasse */
+    padding: 15px;
+}
+
+.modal-content h2 {
+    font-size: 1.3em;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* On s'assure que les rangées de formulaire sont bien en colonne */
+.form-row {
+    flex-direction: column;
+    gap: 0; /* On gère l'espacement sur les .form-group directement */
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 18px; /* Espace vertical entre chaque champ */
+}
+
+/* Styles pour les champs et labels */
+.modal-content label {
+    margin-bottom: 8px; /* Un peu plus d'espace entre le label et le champ */
+    font-size: 0.95em;
+}
+
+.modal-content input,
+.modal-content select {
+    padding: 12px; /* Champs plus faciles à toucher */
+    font-size: 1em;
+}
+
+/* Conteneur des switchs "Durée" / "Salle" */
+.switches-container {
+    flex-direction: column;
+    gap: 15px; /* Espace entre les deux blocs */
+}
+
+
+.switch-wrapper {
+    padding: 12px;
+}
+
+.radio-group {
+    /* On répartit l'espace pour que les options ne soient pas collées */
+    justify-content: space-evenly; 
+}
+
+/* Section "Groupes de joueurs" */
+#edit-groups-container-wrapper {
+    margin-top: 10px;
+}
+.edit-group-row {
+    /* On s'assure que tout est bien centré verticalement */
+    align-items: center;
+}
+.edit-group-row input {
+    /* On laisse un peu plus de place pour le champ nombre de joueurs */
+    width: 100px; 
+    flex-grow: 1; /* Permet au champ de grandir si besoin */
+}
+
+/* On ajoute un espace avant les boutons d'action finaux */
+#edit-reservation-form .form-row:last-of-type {
+    margin-top: 20px;
+}
+
+.modal-content button {
+    padding: 14px;
+    width: 100%;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+#save-edit-btn {
+    margin-bottom: 8px; /* Un peu d'espace entre les deux boutons */
+}
+#mobile-chronos-view .enable-notifications-btn {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px; /* Espace entre le bouton et le premier chrono */
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #fff;
+    background-color: #27ae60; /* Un vert engageant */
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+#mobile-chronos-view .enable-notifications-btn:active {
+    background-color: #2ecc71;
+    transform: translateY(1px); /* Effet d'appui */
+}
+
+
+.mobile-logout-btn-discreet {
+    display: block;
+    width: 80%;
+    margin: 30px auto 10px auto; /* Marge en haut, centré, marge en bas */
+    padding: 12px;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-align: center;
+    color: #e74c3c; /* Texte rouge */
+    background-color: #fff;
+    border: 1px solid #e74c3c;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mobile-logout-btn-discreet:active {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+/* NOUVEAU : Déplacement du bouton hamburger en haut à droite sur mobile */
+.floating-menu-btn,
+#floating-menu-btn {
+    top: 15px !important;
+    bottom: auto !important;
+    right: 15px !important;
+    z-index: 10000 !important; /* On le met tout au-dessus */
+}
+
+/* NOUVEAU : Le menu s'ouvre vers le bas au lieu du haut */
+.floating-menu-items {
+    top: 75px !important; /* Juste en dessous du bouton */
+    bottom: auto !important;
+}
+
+/* NOUVEAU : Empêcher l'écrasement des champs dans la modale Groupes */
+#groups-modal .group-row,
+#groups-list > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+border-radius: 8px;
+}
+
+/* NOUVEAU : Forcer les inputs (sauf checkbox) et selects à prendre toute la largeur dispo */
+#groups-modal input:not([type="checkbox"]),
+#groups-modal select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* NOUVEAU : Les cases à cocher reprennent leur taille normale */
+#groups-modal input[type="checkbox"] {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    margin-right: 10px !important;
+}
+
+input, select {
+    width:auto;
+}
+
+
+.modal {
+    z-index: 10001 !important; 
+}
+
+/* NOUVEAU : Surcharge de la largeur pour que les inputs s'adaptent à leur contenu */
+#groups-modal input, 
+#groups-modal select {
+    width: auto !important;
+}
+
+/* NOUVEAU : Conteneur flexible qui autorise le retour à la ligne */
+#groups-modal .form-row > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 10px !important;
+    padding: 8px 0 !important;
+}
+
+/* NOUVEAU : Le bouton est poussé sur sa propre ligne en dessous */
+#groups-modal .form-row > div button {
+    flex: 1 1 100% !important;
+    margin-top: 5px !important;
+}
+
+/* NOUVEAU : Le bouton est poussé sur sa propre ligne en dessous */
+#groups-modal .form-row > div button {
+    flex: 1 1 100% !important;
+    margin-top: 5px !important;
+}
+
+/* NOUVEAU : Passage du bouton d'ajout d'activité sous les inputs pour mobile */
+.group-activity-inputs {
+    flex-wrap: wrap !important;
+}
+.group-activity-inputs #group-act-name {
+    flex: 1 1 60% !important; /* Le nom prend un peu plus de place que le prix */
+}
+.group-activity-inputs #group-act-price {
+    flex: 1 1 30% !important;
+}
+.group-activity-inputs #add-group-activity-btn {
+    flex: 1 1 100% !important;
+    margin-top: 5px;
+    padding: 10px !important; /* Zone de clic plus confortable sur mobile */
+}
+.modal-content .delete-btn{
+    width:10%;
+    height: 20px;
+}
+
+/* NOUVEAU : Ajustement de l'en-tête de la modale de gestion des groupes */
+    #groups-management-modal .modal-content > div:first-of-type {
+        flex-direction: column !important;
+        gap: 15px;
+    }
+    
+    #groups-management-modal #add-group-creation-btn {
+        width: 100% !important;
+    }
+
+    /* NOUVEAU : Transformation des lignes de la liste des groupes en cartes sur mobile */
+    #all-groups-list {
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+    }
+    
+    #all-groups-list > div {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    /* NOUVEAU : Les boutons d'action de chaque groupe prennent toute la largeur */
+    #all-groups-list > div button {
+        width: 100% !important;
+        margin-top: 5px;
+        padding: 12px !important;
+        box-sizing: border-box;
+        height:40px;
+    }

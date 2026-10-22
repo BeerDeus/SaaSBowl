@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sandbox-locale",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-c", "import http.server, functools\nD = 'C:/Users/sbowl/Documents/LaserGameTest'\nclass H(http.server.SimpleHTTPRequestHandler):\n    def do_GET(self):\n        if self.path in ('/', '/index.html'):\n            self.send_response(302); self.send_header('Location', '/maquettes/e-v2.html'); self.end_headers(); return\n        super().do_GET()\nhttp.server.ThreadingHTTPServer(('127.0.0.1', 8765), functools.partial(H, directory=D)).serve_forever()"],
+      "port": 8765
+    }
+  ]
+}

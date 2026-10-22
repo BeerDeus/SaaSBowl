@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="module">
+        // Imports Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, onSnapshot, setDoc, updateDoc, collection, addDoc, getDocs, writeBatch, query, where, deleteDoc, deleteField, orderBy, limit, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    
+        // Votre configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8PUEm3iIU-AQvEBGroyuvSkRSuIzW6Js",
+            authDomain: "bowlingbackend.firebaseapp.com",
+            projectId: "bowlingbackend",
+            storageBucket: "bowlingbackend.firebasestorage.app",
+            messagingSenderId: "1034643104412",
+            appId: "1:1034643104412:web:7f722d34fb6b508f770359",
+            measurementId: "G-0SV8T1V8MC",
+        };
+    
+        // Initialisation
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+    
+        // On rend les outils Firebase accessibles globalement dans le script principal
+        window.firebaseTools = {
+            auth,
+            db,
+            GoogleAuthProvider,
+            onAuthStateChanged,
+            signInWithPopup,
+            signOut,
+            doc,
+            getDoc,
+            setDoc,
+            updateDoc,
+            onSnapshot,
+            collection,
+            addDoc,
+            getDocs,
+            writeBatch,
+            query,
+            where,
+            deleteDoc,
+            deleteField, 
+            orderBy,
+            limit,
+            arrayUnion,
+            serverTimestamp
+        };
+    </script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gestion des Réservations - Laser Game</title>
+    <link rel="stylesheet" href="style_v2.css?v=3.2">
+    <link rel="stylesheet" href="mobile-style.css?v=1.1" media="(max-width: 768px)">
+    <link rel="icon" type="image/vnd.icon" href="favicon.ico">
+</head>
+<body>
+        <div id="offline-banner" style="display: none;">⚠️ Connexion perdue — les données affichées peuvent ne pas être à jour.</div>
+
+        <button id="crm-alert-btn" style="display: none;" title="Conflits de superposition CRM à traiter">
+            🚨 <span class="crm-alert-count">0</span>
+        </button>
+        <div id="crm-alert-panel">
+            <div class="crm-alert-panel-header">Superpositions CRM à traiter</div>
+            <div id="crm-alert-list"></div>
+        </div>
+
+        <div id="mobile-container" style="display: none;">
+            <div id="mobile-chronos-view" class="mobile-view">
+                <button class="enable-notifications-btn" style="display: none;">🔔 Activer les notifs</button>
+            </div>
+
+        <div id="mobile-laser-view" class="mobile-view">
+            <div class="mobile-sub-nav">
+                <button class="sub-nav-btn active" data-target="room-2">⬆️ Haut ⬆️</button>
+                <button class="sub-nav-btn" data-target="room-1">⬇️ Bas ⬇️</button>
+            </div>
+            <div class="mobile-calendar-container">
+                 </div>
+        </div>
+
+<div id="mobile-qk-view" class="mobile-view">
+    <div class="mobile-sub-nav">
+        <button class="sub-nav-btn active" data-target="room-quiz">🚨 Quiz-Boxing 🚨</button>
+        <button class="sub-nav-btn" data-target="room-karaoke">🎙️ Karaoké 🎙️</button>
+    </div>
+    <div class="mobile-calendar-container">
+         </div>
+    <button id="mobile-logout-btn" class="mobile-logout-btn-discreet">Déconnexion</button>
+</div>
+    </div>
+    <div id="auth-container" style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background-color: #2c3e50; color: white;">
+        <h1>Gestionnaire de Réservations</h1>
+        <p id="auth-status">Veuillez vous connecter pour continuer...</p>
+        <button id="login-btn" style="padding: 15px 30px; font-size: 18px; background-color: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Connexion avec Google</button>
+    </div>
+
+    <div class="container" id="main-container" style="display: none;">
+        <div class="main-header">
+            <h1><span id="secret-theme-trigger-blue" title="">G</span>estion des <span id="secret-theme-trigger-green" title="">R</span>éservation<span id="secret-theme-trigger" title="">s</span></h1>
+            <button id="manual-sync-btn" style="background-color: #2196f3; color: white;">🔄 Vérifier les nouvelles résa CRM</button>
+            <span style="display: flex; align-items: center; gap: 4px; font-size: 0.8em; white-space: nowrap;" title="Temps d'attente affiché aux clients sur le CRM">
+                ⏱️
+                <input type="number" id="waiting-time-input" min="0" style="width: 50px; padding: 4px;">
+                <span>min</span>
+                <button type="button" id="waiting-time-save-btn" style="padding: 4px 8px; font-size: 0.95em;">💾</button>
+            </span>
+            <button id="enable-notifications-btn" style="display: none;">🔔 Activer les notifs</button>
+            <button id="logout-btn" style="display: none;">Déconnexion</button>
+        </div>
+
+    <div class="view-toggle-container">
+        <button id="toggle-laser-game" class="view-toggle-btn active">Laser Game</button>
+        <button id="toggle-quiz-karaoke" class="view-toggle-btn">Quiz Boxing / Karaoké</button>
+        <button id="toggle-birthdays" class="view-toggle-btn">🎂 Anniversaires</button>
+        <button id="toggle-table-plan" class="view-toggle-btn">🗺️ Plan de Table</button>
+    </div>
+    <div class="sticky-placeholder"></div>
+        <div id="laser-game-view">
+        <div class="counters-containerDisplay">
+            <div class="counters-container">
+                <div class="counter" id="counter-2">
+                    <div class="counter-titre"><h3>⬆️ Salle Haut ⬆️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 16 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+                </div>
+            </div>
+            <div class="counters-container">
+            <div class="counter" id="counter-1">
+                <div class="counter-titre"><h3>⬇️ Salle Bas ⬇️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-3">
+                    <div class="counter-titre"><h3>🎙️ Karaoke 🎙️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 10 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="30">30 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="180" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-4">
+                    <div class="counter-titre"><h3>🚨 QuizzBoxing 🚨<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="25">25 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="70" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="counters-sticky-placeholder"></div>
+            <div class="calendar-container">
+                <h2>Calendrier des Réservations</h2>
+                <div class="date-controls">
+                    <button id="prev-day">← Jour précédent</button>
+                    <span id="current-date">Aujourd'hui</span>
+                    <div class="date-picker-container">
+                        <button id="calendar-btn" title="Choisir une date">📅</button>
+                        <input type="date" id="calendar-input">
+                    </div>
+                    <button id="today-btn" title="Revenir à aujourd'hui">Aujourd'hui</button>
+                    <button id="next-day">Jour suivant →</button>
+                </div>
+                <div class="rooms-container">
+                    <div class="room" id="room-2">
+                        <h3>⬆️ Haut ⬆️</h3>
+                        <div class="time-slots"></div>
+                    </div>
+                    <div class="room" id="room-1">
+                        <h3>⬇️ Bas ⬇️</h3>
+                        <div class="time-slots"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="quiz-karaoke-view" style="display: none;">
+
+                <div class="counters-containerDisplay">
+            <div class="counters-container">
+                <div class="counter" id="counter-2">
+                    <div class="counter-titre"><h3>⬆️ Salle Haut ⬆️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 16 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+                </div>
+            </div>
+            <div class="counters-container">
+            <div class="counter" id="counter-1">
+                <div class="counter-titre"><h3>⬇️ Salle Bas ⬇️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-3">
+                    <div class="counter-titre"><h3>🎙️ Karaoke 🎙️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 10 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="30">30 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="180" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-4">
+                    <div class="counter-titre"><h3>🚨 QuizzBoxing 🚨<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="25">25 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="70" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div class="counters-sticky-placeholder"></div>
+            <div class="calendar-container" id="quiz-karaoke-calendar-container">
+                <h2>Calendrier Quiz / Karaoké</h2>
+                <div class="date-controls" id="qk-date-controls">
+                    <button id="qk-prev-day">← Jour précédent</button>
+                    <span id="qk-current-date">Aujourd'hui</span>
+                    <div class="date-picker-container">
+                        <button id="qk-calendar-btn" title="Choisir une date">📅</button>
+                        <input type="date" id="qk-calendar-input">
+                    </div>
+                    <button id="qk-today-btn" title="Revenir à aujourd'hui">Aujourd'hui</button>
+                    <button id="qk-next-day">Jour suivant →</button>
+                </div>
+                <div class="rooms-container">
+                    <div class="room" id="room-quiz">
+                        <h3>🚨 Quiz-Boxing 🚨</h3>
+                        <div class="time-slots"></div>
+                    </div>
+                    <div class="room" id="room-karaoke">
+                        <h3>🎙️ Karaoké 🎙️</h3>
+                        <div class="time-slots"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+		
+		
+		<div id="birthdays-view" style="display: none;">            
+            <div class="birthday-form-container">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; flex-wrap: wrap;">
+                <h2 style="margin: 0;">🎂 Nouvel Anniversaire du Jour</h2>
+                <button id="print-bd-btn" class="button-secondary" style="background-color: #8e44ad; color: white;">🖨️ Imprimer les fiches</button>
+                <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9em;">
+                    🤖
+                    <input type="date" id="auto-generate-start" style="padding: 4px;">
+                    →
+                    <input type="date" id="auto-generate-end" style="padding: 4px;">
+                    <button id="auto-generate-bd-btn" class="button-secondary" style="background-color: #2196f3; color: white;" type="button">Générer depuis CRM</button>
+                </span>
+                <span style="display: flex; align-items: center; gap: 4px; font-size: 0.9em;">
+                    🍬
+                    <input type="date" id="candy-list-date" style="padding: 4px;">
+                    <button id="print-candy-list-btn" class="button-secondary" style="background-color: #e67e22; color: white;" type="button">Liste paniers</button>
+                </span>
+            </div>
+                <button id="toggle-bd-form-btn" class="toggle-arrow" type="button">▼</button>
+                <form id="birthday-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Enfant</label>
+                            <input type="text" id="bd-name" placeholder="Prénom" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Âge</label>
+                            <input type="number" id="bd-age" style="width: 60px;" min="4" max="16" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nb Enfants</label>
+                            <input type="number" id="bd-count" style="width: 60px;" min="4" max="16" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="bd-date" required title="Aujourd'hui par défaut — change si la résa notée à la main est pour un autre jour (compte quand même pour la capacité de ce jour-là)">
+                        </div>
+                        <div class="form-group">
+                            <label>Heure d'arrivée</label>
+                            <select id="bd-time" required>
+                                </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Gâteau</label>
+                            <select id="bd-cake">
+                                <option value="chocolat">Donuts Chocolat</option>
+                                <option value="sucre">Donuts Sucre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Champomy</label>
+                            <select id="bd-champomy">
+                                <option value="0">Aucun</option>
+                                <option value="1">1 Bouteille</option>
+                                <option value="2">2 Bouteilles</option>
+                                <option value="3">3 Bouteilles</option>
+                                <option value="4">4 Bouteilles</option>
+                                <option value="5">5 Bouteilles</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Formule</label>
+                        <select id="bd-formula" required>
+                            <option value="bowling_enfant">Bowling Enfant (50min bowl + 1 boisson)</option>
+                            <option value="bowling_jeune">Bowling Jeune (1h20 bowl + 2 boissons)</option>
+                            <option value="bowling_laser">Bowling + Laser (20min laser + 50min bowl + 2 boissons)</option>
+                            <option value="laser_jeune">Laser Jeune (2x20min laser + 2 boissons)</option>
+                            <option value="quiz">Quiz Boxing (1h quiz + 1 boissons)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <button type="submit" class="button">Créer la fiche Anniversaire</button>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9em; color: #7f8c8d;">
+                            <input type="checkbox" id="bd-no-deposit" style="width: auto; margin: 0;">
+                            <label for="bd-no-deposit" style="margin: 0; font-weight: normal; cursor: pointer;">Sans acompte</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        <div class="counters-containerDisplay">
+            <div class="counters-container">
+                <div class="counter" id="counter-2-anniv">
+                    <div class="counter-titre"><h3>⬆️ Salle Haut ⬆️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 16 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+                </div>
+            </div>
+            <div class="counters-container">
+            <div class="counter" id="counter-1-anniv">
+                <div class="counter-titre"><h3>⬆️ Salle Bas ⬆️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                <div class="counter-display">00:00</div>
+                <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="18">18 min</button>
+                    <button class="preset-btn" data-minutes="28">28 min</button>
+                    <input type="number" min="1" max="40" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-3-anniv">
+                    <div class="counter-titre"><h3>🎙️ Karaoke 🎙️<br><span style='font-size:0.8em; font-weight:normal;'>Max: 10 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="30">30 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="180" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+            <div class="counters-container">
+                <div class="counter" id="counter-4-anniv">
+                    <div class="counter-titre"><h3>🚨 QuizzBoxing 🚨<br><span style='font-size:0.8em; font-weight:normal;'>Max: 12 joueurs</span></h3></div>
+                    <div class="counter-display">00:00</div>
+                    <div class="counter-controls">
+                    <button class="reset-btn">Reset</button>
+                    <button class="stop-btn">Stop</button>
+                    <button class="preset-btn" data-minutes="25">25 min</button>
+                    <button class="preset-btn" data-minutes="60">60 min</button>
+                    <input type="number" min="1" max="70" placeholder="Min" class="custom-time-input">
+                    <button class="start-custom-btn">Start</button>
+                </div>
+            </div>
+            </div>
+        </div>
+            <div class="counters-sticky-placeholder"></div>
+    <div id="global-timeline-wrapper" style="display: none;">
+        <h3 style="margin-left: 20px; color: #2c3e50;">Frise des activités en cours</h3>
+        <div class="timeline-container">
+            <div class="timeline-line"></div>
+            <div id="timeline-items-container" class="timeline-items-container">
+                </div>
+        </div>
+    </div>
+            <div class="date-controls bd-date-controls">
+                <button id="delete-all-birthdays-btn" type="button" title="Supprime définitivement toutes les fiches anniversaire existantes" style="background-color:#e74c3c; color:white; border:none; border-radius:4px; padding:4px 10px; margin-right:10px; cursor:pointer; font-weight:bold; font-size:0.85em;">🗑️ Supprimer tous les anniversaires</button>
+                <span style="font-weight:bold; margin-right:4px;">📅 Fiches par date :</span>
+                <button id="bd-prev-day" type="button">←</button>
+                <span id="bd-current-date">Aujourd'hui</span>
+                <div class="date-picker-container">
+                    <input type="date" id="bd-calendar-input">
+                </div>
+                <button id="bd-today-btn" type="button" title="Revenir à aujourd'hui">Aujourd'hui</button>
+                <button id="bd-next-day" type="button">→</button>
+            </div>
+            <div id="birthdays-grid" class="birthdays-grid">
+                </div>
+        </div>
+        <div id="table-plan-view" style="display: none;">
+            <div class="birthday-form-container">
+                <h2>🗺️ Plan de Table</h2>
+
+                <div class="date-controls table-plan-date-controls" style="margin-bottom: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-weight:bold; margin-right:4px;">📅 Plan de table pour :</span>
+                    <button id="table-plan-prev-day" type="button">←</button>
+                    <span id="table-plan-current-date">Aujourd'hui</span>
+                    <div class="date-picker-container">
+                        <input type="date" id="table-plan-date-input">
+                    </div>
+                    <button id="table-plan-today-btn" type="button" title="Revenir à aujourd'hui">Aujourd'hui</button>
+                    <button id="table-plan-next-day" type="button">→</button>
+                </div>
+
+                <div class="table-plan-controls" style="margin-bottom: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button id="refresh-plan-btn" class="action-btn" style="background-color: #3498db;">
+                        🔄 Actualiser Tout (Reset)
+                    </button>
+                    <button id="update-counts-btn" class="action-btn" style="background-color: #f39c12;">
+                        🔢 MàJ Nombres Uniquement
+                    </button>
+                    <button id="toggle-edit-mode-btn" class="action-btn" style="background-color: #9b59b6;">
+                        ✏️ Mode Modifier : OFF
+                    </button>
+                </div>
+                <div id="table-plan-container" class="table-plan-board">
+                    </div>
+            </div>
+        </div>
+
+        <div class="credit">Fait par les extraordinaires Fuchey Steven & Stuis Martin (sous la supervision de ce grand malade de Schwieczerski Eric).</div>
+    </div> 
+
+    <div id="special-periods-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Gestion des Périodes Spéciales (Vacances / Jours Fériés)</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="special-date-start">Ajouter une période (début):</label>
+                    <input type="date" id="special-date-start">
+                </div>
+                <div class="form-group">
+                    <label for="special-date-end">Fin (laisser vide si jour férié):</label>
+                    <input type="date" id="special-date-end">
+                </div>
+            </div>
+            <button id="add-special-period" class="button">Ajouter la période</button>
+            <h3 style="margin-top: 20px;">Périodes enregistrées</h3>
+            <div id="special-periods-list"></div>
+        </div>
+    </div>
+
+    <div id="pricing-modal" class="modal">
+        <div class="modal-content pricing-modal-content">
+            <span class="close-button">&times;</span>
+            <h2>💶 Gestion des Tarifs</h2>
+            <p class="pricing-hint">Tous les tarifs sont par personne. Pour chaque activité, les règles sont vérifiées dans l'ordre affiché : la première qui correspond au jour, à l'heure et au contexte (normal / vacances-fériés) s'applique — pratique pour découper une même journée en plusieurs tranches horaires.</p>
+
+            <div class="pricing-tabs">
+                <button type="button" class="pricing-tab-btn active" data-activity="laser">🔫 Laser</button>
+                <button type="button" class="pricing-tab-btn" data-activity="karaoke">🎤 Karaoké</button>
+                <button type="button" class="pricing-tab-btn" data-activity="quiz">🧠 Quiz</button>
+            </div>
+
+            <div id="pricing-rules-container"></div>
+
+            <div class="pricing-actions-row">
+                <button type="button" id="add-pricing-rule" class="button">+ Ajouter une règle</button>
+                <button type="button" id="save-pricing" class="button" style="background-color:#2ecc71;">💾 Enregistrer les tarifs</button>
+                <button type="button" id="reset-pricing-defaults" class="button-secondary">↺ Réinitialiser aux tarifs par défaut</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-reservation-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Modifier la Réservation</h2>
+            <form id="edit-reservation-form">
+                <input type="hidden" id="edit-reservation-id">
+                <input type="hidden" id="edit-reservation-type">
+    
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-client-name">Nom du client:</label>
+                        <input type="text" id="edit-client-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-client-phone">Numéro de téléphone:</label>
+                        <input type="tel" id="edit-client-phone">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="edit-booked-by">Qui a pris la réservation ? <span style="color:#e74c3c;">*</span></label>
+                        <input type="text" id="edit-booked-by" list="booked-by-options" placeholder="Choisir ou écrire un nom..." autocomplete="off" required>
+                        <datalist id="booked-by-options"></datalist>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-reservation-date">Date:</label>
+                        <input type="date" id="edit-reservation-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-start-time">Heure de début:</label>
+                        <select id="edit-start-time" required></select>
+                    </div>
+                    <div class="form-group" id="edit-players-group">
+                        <label for="edit-players">Nombre de joueurs:</label>
+                        <input type="number" id="edit-players" min="2" value="2" required>
+                    </div>
+                </div>
+    
+                <div class="switches-container" id="edit-laser-game-options">
+                    <div class="switch-wrapper">
+                        <label class="switch-label">Durée</label>
+                        <div class="radio-group" id="edit-duration-choice">
+                            <div>
+                                <input type="radio" id="edit-duration-20" name="edit-duration" value="20">
+                                <label for="edit-duration-20">20 min</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="edit-duration-30" name="edit-duration" value="30">
+                                <label for="edit-duration-30">30 min</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="switch-wrapper">
+                        <label class="switch-label">Salle</label>
+                        <div class="radio-group" id="edit-room-choice">
+                            <div>
+                                <input type="radio" id="edit-room-bas" name="edit-room" value="1">
+                                <label for="edit-room-bas">Salle Bas</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="edit-room-haut" name="edit-room" value="2">
+                                <label for="edit-room-haut">Salle Haut</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="switches-container" id="edit-qk-options">
+                    <div class="switch-wrapper">
+                        <label class="switch-label">Activité</label>
+                        <div class="radio-group">
+                            <div>
+                                <input type="radio" id="edit-activity-quiz" name="edit-activity" value="quiz">
+                                <label for="edit-activity-quiz">Quiz Boxing</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="edit-activity-karaoke" name="edit-activity" value="karaoke">
+                                <label for="edit-activity-karaoke">Karaoké</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="switch-wrapper">
+                        <label class="switch-label">Durée</label>
+                        <div class="radio-group">
+                           <div>
+                                <input type="radio" id="edit-qk-duration-30" name="edit-qk-duration" value="30">
+                                <label for="edit-qk-duration-30">30 min</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="edit-qk-duration-60" name="edit-qk-duration" value="60" checked>
+                                <label for="edit-qk-duration-60">60 min</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="form-group" id="edit-groups-container-wrapper">
+                    <label>Groupes de joueurs (Laser Game):</label>
+                    <div id="edit-groups-container"></div>
+                    <button type="button" id="add-group-btn" class="button-secondary">+ Ajouter un groupe</button>
+                </div>
+                
+                <div class="form-group" id="edit-laser-game-type">
+                    <label style="margin-bottom: 8px;">Type de réservation (Laser Game):</label>
+                    <div class="radio-group" style="justify-content: center; height: auto; background-color: #f8f9fa; padding: 10px; border-radius: 8px;">
+                        <div>
+                            <input type="radio" id="edit-type-none" name="edit-booking-type" value="none">
+                            <label for="edit-type-none">Aucun</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="edit-type-anniversaire" name="edit-booking-type" value="anniversaire">
+                            <label for="edit-type-anniversaire">Anniversaire</label>
+                        </div>
+                        <div>
+                            <input type="radio" id="edit-type-groupe" name="edit-booking-type" value="groupe">
+                            <label for="edit-type-groupe">Groupe</label>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="form-row">
+                    <button type="submit" id="save-edit-btn">Enregistrer</button>
+                    <button type="button" id="cancel-edit-btn" class="button-secondary">Annuler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="custom-alert-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <p id="custom-alert-message" style="font-size: 1.1em; margin-bottom: 20px;">Message</p>
+            <input type="text" id="custom-alert-input" placeholder="Nom..." style="display:none; width: 100%; box-sizing: border-box; padding: 8px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;">
+            <div id="custom-alert-buttons">
+                <button id="custom-alert-ok" class="button">OK</button>
+                <button id="custom-alert-confirm" class="button">Confirmer</button>
+                <button id="custom-alert-cancel" class="button-secondary">Annuler</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notepad-container" class="notes-panel-container" style="display: none;">
+        <div class="notes-panel-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                <h4 style="margin: 0; border: none; padding: 0;">Attente Billard</h4>
+                <span style="background: #e74c3c; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9em;" id="billard-queue-count">0</span>
+            </div>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <input type="text" id="billard-new-name" placeholder="Nom..." style="flex:1; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                <button id="billard-add-btn" style="padding: 5px 12px; background: #2ecc71; border:none; color:white; border-radius:4px; font-weight: bold; cursor: pointer;">+</button>
+            </div>
+            <div id="billard-queue-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
+        </div>
+    </div>
+
+    <div id="general-notes-container" class="notes-panel-container left" style="display: none;">
+        <div class="notes-panel-content">
+            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                <button type="button" id="tab-groups-today" class="tab-btn active" style="flex: 1; font-size: 0.75em; padding: 6px 4px;">Groupes du jour</button>
+                <button type="button" id="tab-lanes-reserved" class="tab-btn" style="flex: 1; font-size: 0.75em; padding: 6px 4px;">🎳 Pistes réservées</button>
+            </div>
+            <div id="today-groups-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;"></div>
+            <div id="lanes-reserved-panel" style="display: none; flex-direction: column; flex: 1; min-height: 0;">
+                <div style="text-align: right; margin-bottom: 6px;">
+                    <button type="button" id="lanes-reserved-refresh-btn" class="button-secondary" style="font-size: 0.75em; padding: 4px 8px;">🔄 Actualiser</button>
+                </div>
+                <div id="lanes-reserved-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" id="midnight-verification-btn" title="Vérifier l'historique de la journée passée" style="display:none;">🌙 Vérifier la journée</button>
+
+    <button type="button" id="day-note-toggle" class="day-note-toggle" title="Note du jour">
+        📝
+        <span id="day-note-indicator" class="day-note-indicator" style="display: none;">*</span>
+    </button>
+
+    <div id="day-note-panel" class="day-note-panel" style="display: none;">
+        <div class="day-note-header">
+            <h4 id="day-note-title">Note du jour</h4>
+            <span id="day-note-close" class="day-note-close">&times;</span>
+        </div>
+        <textarea id="day-note-textarea" placeholder="Écrire une note pour ce jour..."></textarea>
+        <div class="day-note-footer">
+            <span id="day-note-status"></span>
+            <button type="button" id="day-note-save" class="button">Enregistrer</button>
+        </div>
+    </div>
+
+    <div class="floating-menu-container">
+        <button id="floating-menu-toggle" class="floating-menu-toggle">☰</button>
+        <div id="floating-menu-items" class="floating-menu-items">
+            <button type="button" id="open-deposit-list-modal" class="floating-menu-item">💰 Liste acompte</button>
+            <button type="button" id="open-mobile-birthdays-modal" class="floating-menu-item mobile-only-item">🎂 Liste Anniversaires</button>
+            <button type="button" id="toggle-dark-theme" class="floating-menu-item">🌙 Thème sombre</button>
+            <button type="button" id="open-sync-logs-modal" class="floating-menu-item">📋 Logs</button>
+            <button type="button" id="open-bar-monitoring-modal" class="floating-menu-item">🍹 Monitoring Bar</button>
+            <a href="/waiterio/index" target="_blank" rel="noopener" id="open-waiterio-link" class="floating-menu-item" aria-label="Commandes Boissons" title="Commandes Boissons">🥤</a>
+            <button type="button" id="floating-submenu-toggle-parametres" class="floating-menu-item floating-menu-submenu-toggle">⚙️ Paramètres ▾</button>
+            <div id="floating-submenu-parametres" class="floating-menu-submenu-items">
+                <button type="button" id="open-groups-modal" class="floating-menu-item">👥 Gérer les Groupes</button>
+                <button type="button" id="open-user-management-modal" class="floating-menu-item" style="display: none;">👤 Gérer les utilisateurs</button>
+                <button type="button" id="open-special-periods-modal" class="floating-menu-item">📅 Gérer les périodes</button>
+                <button type="button" id="open-pricing-modal" class="floating-menu-item">💶 Gérer les tarifs</button>
+                <button type="button" id="print-cash-sheet-btn" class="floating-menu-item">🖨️ Imprimer feuille de caisse</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bar-monitoring-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-bar-monitoring-modal">&times;</span>
+            <h2 style="margin-top: 0;">🍹 Monitoring Bar</h2>
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: -8px;">Vérifie les nouvelles commandes du bar toutes les 30s quand les barmans ne sont pas devant l'écran.</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <span id="bar-monitoring-status" style="font-weight: bold; color: #7f8c8d;">⏸ Arrêté</span>
+                <button type="button" id="bar-monitoring-toggle-btn" class="button">▶ Démarrer</button>
+            </div>
+            <div id="bar-monitoring-list" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="sync-logs-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px; max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-sync-logs-modal">&times;</span>
+            <h2 style="margin-top: 0;">📋 Logs synchro CRM</h2>
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: -8px;">Ce que le scan CRM a fait aux derniers passages (résas trouvées, créneaux fermés en doublon).</p>
+            <div id="sync-logs-list" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="deposit-list-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-deposit-list-modal">&times;</span>
+            <h2 style="margin-top: 0; color: #27ae60;">💰 Liste acompte</h2>
+            <div style="display: flex; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                <input type="date" id="deposit-list-date" style="flex: 1; padding: 6px;">
+            </div>
+            <div id="deposit-list-content" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <div id="groups-management-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close-button" id="close-groups-modal">&times;</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0;">Gestion des Groupes</h2>
+                <button id="add-group-creation-btn" class="button" style="background-color: #2ecc71;">+ Ajouter un Groupe</button>
+            </div>
+            <div id="all-groups-list" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: #f9f9f9;">
+                </div>
+        </div>
+    </div>
+
+    <div id="create-group-modal" class="modal" style="z-index: 1005;">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-button" id="close-create-group-modal">&times;</span>
+            <h2>Nouveau Groupe</h2>
+            <form id="create-group-form">
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>Nom du Groupe</label>
+                        <input type="text" id="group-name" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Nb. Personnes</label>
+                        <input type="text" id="group-count" placeholder='Ecrire le nombre ou "?"' required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date d'arrivée</label>
+                        <input type="date" id="group-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Heure</label>
+                        <input type="time" id="group-time">
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <input type="checkbox" id="group-is-ok" style="width: auto;">
+                    <label for="group-is-ok" style="margin: 0; cursor: pointer; font-weight: bold; color: #27ae60;">Groupe validé (Ok)</label>
+                </div>
+                <div class="form-group">
+                    <label>Activités & Prix</label>
+                    <div id="group-activities-container" style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;"></div>
+                    <div class="group-activity-inputs" style="display: flex; gap: 5px;">
+                        <input type="text" id="group-act-name" placeholder="Nom de l'activité (ex: Bowling)" style="flex: 2;">
+                        <input type="text" id="group-act-price" placeholder="Prix (€)" style="flex: 1; text-align: center;">
+                        <button type="button" id="add-group-activity-btn" style="background-color: #3498db; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-weight:bold;">+</button>
+                    </div>
+                </div>
+                <button type="submit" class="button" style="width: 100%; margin-top: 10px;">Enregistrer le groupe</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="user-management-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Gestion des utilisateurs</h2>
+            <p>Assignez un rôle à chaque utilisateur.</p>
+            <div id="user-list-container">
+                </div>
+        </div>
+    </div>
+
+    <button type="button" id="open-cleaning-modal" class="settings-btn" style="bottom: 20px; left: 20px; right: auto;">🧹 Planning Nettoyage</button>
+
+    <div id="cleaning-modal" class="modal">
+        <div class="modal-content" style="max-width: 98% !important; width: 1400px !important; height: 90vh; display: flex; flex-direction: column;">
+            <span class="close-button">&times;</span>
+            
+            <div class="cleaning-header" style="position: relative; text-align: center; margin-bottom: 15px; display:flex; justify-content:center; align-items:center;">
+                <button id="open-leaderboard-btn" class="button-secondary" style="position: absolute; left: 0; background-color: #f1c40f; color: #333; font-weight: bold;">🏆 Leaderboard</button>
+                <button id="open-bounty-board-btn" class="button-secondary" style="position: absolute; left: 140px; background-color: #8e44ad; color: white; font-weight: bold; border: 2px solid #732d91;">📜 Primes</button>
+                
+                <button id="cleaning-prev-week" class="button-secondary">← Semaine préc.</button>
+                <h2 id="cleaning-week-display" style="margin: 0 20px;">Semaine du ... au ...</h2>
+                <button id="cleaning-next-week" class="button-secondary">Semaine suiv. →</button>
+                
+                <div id="cleaning-save-status" style="position: absolute; right: 0; font-size: 0.8em; color: #7f8c8d;">Synchronisé</div>
+            </div>
+
+            <div id="cleaning-lock-message" style="display:none; background-color: #e74c3c; color: white; text-align: center; padding: 5px; margin-bottom: 10px; border-radius: 4px;">
+                🔒 Cette semaine est verrouillée et ne peut plus être modifiée.
+            </div>
+
+            <div style="flex: 1; overflow: auto; border: 1px solid #ddd;">
+                <table id="cleaning-table" class="cleaning-table">
+                    <thead>
+                        <tr>
+                            <th>Catégorie</th>
+                            <th>Tâche</th>
+                            <th>Lundi</th>
+                            <th>Mardi</th>
+                            <th>Mercredi</th>
+                            <th>Jeudi</th>
+                            <th>Vendredi</th>
+                            <th>Samedi</th>
+                            <th>Dimanche</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+                <div id="additional-tasks-section" style="margin-top: 15px; border-top: 2px solid #ecf0f1; padding-top: 10px; position: relative;">
+                    <button id="info-exceptional-btn" title="Voir les barèmes" style="position: absolute; top: 10px; right: 0; background: none; border: none; font-size: 1.2em; cursor: pointer;">ℹ️</button>
+                    
+                    <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 1.1em;">✨ Tâches Exceptionnelles (+1 point par défaut)</h3>
+                    <div id="additional-tasks-container" style="display: flex; gap: 10px;">
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="cleaning-toolbar" style="justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <p style="margin: 0 10px 0 0; font-weight: bold;">Qui nettoie ?</p>
+                    <div id="cleaning-tools-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        </div>
+                    <button id="manage-cleaners-btn" class="button-secondary" style="margin-left: 10px; padding: 5px 10px;" title="Gérer l'équipe">⚙️</button>
+                </div>
+
+                <div id="weekly-champion-display" style="font-weight: bold; color: #2c3e50; font-size: 1.1em; padding: 5px 15px; background: white; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    👑 Champion : <span id="champion-name">...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard-modal" class="modal" style="z-index: 1050;">
+        <div class="modal-content" style="width: 450px; text-align: center; background: #fff;">
+            <span class="close-button" id="close-leaderboard">&times;</span>
+            
+            <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button id="tab-weekly" class="tab-btn active">📅 Semaine</button>
+                <button id="tab-global" class="tab-btn">🌍 Hall of Fame</button>
+                <button id="tab-bounty-hunter" class="tab-btn">🤠 Bounty Hunters</button>
+            </div>
+
+            <div id="leaderboard-content-weekly">
+                <h2 style="color: #f1c40f; margin-top:0;">🏆 Classement Semaine</h2>
+                <div id="leaderboard-list" style="margin-top: 10px;"></div>
+            </div>
+
+            <div id="leaderboard-content-global" style="display: none;">
+                <h2 class="hof-title">👑 <span>Hall of Fame</span> 👑</h2>
+                
+                <div id="global-leaderboard-list" style="margin-top: 10px;"></div>
+
+                <p style="font-size: 0.8em; color: #bdc3c7; margin-top: 15px; margin-bottom: 0; font-style: italic;">(Cumul des semaines remportées)</p>
+            </div>
+            <div id="leaderboard-content-bounty" style="display: none;">
+                <h2 style="color: #8e44ad; margin-top:0;">🤠 Top Chasseurs de Primes</h2>
+                <div id="leaderboard-list-bounty" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="pin-modal" class="modal" style="z-index: 3000;">
+        <div class="modal-content" style="max-width: 300px; text-align: center;">
+            <span class="close-button" id="close-pin-modal">&times;</span>
+            <h3>🔐 Accès Sécurisé</h3>
+            <p>Entrez le code administrateur</p>
+            <input type="password" id="admin-pin-input" placeholder="Code PIN" style="text-align: center; font-size: 1.5em; letter-spacing: 5px; margin-bottom: 15px;">
+            <button id="validate-pin-btn" class="button" style="width: 100%;">Valider</button>
+            <p id="pin-error-msg" style="color: red; display: none; margin-top: 10px;">Code incorrect</p>
+        </div>
+    </div>
+
+    <div id="cleaners-management-modal" class="modal" style="z-index: 2001;">
+        <div class="modal-content" style="max-width: 600px;"> <span class="close-button" id="close-cleaners-modal">&times;</span>
+            <h2>⚙️ Administration</h2>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; flex-wrap: wrap;">
+                <button id="tab-admin-cleaners" class="tab-btn active" style="flex:1;">👥 Équipe</button>
+                <button id="tab-admin-tasks" class="tab-btn" style="flex:1;">📋 Tâches</button>
+                <button id="tab-admin-logs" class="tab-btn" style="flex:1;">📜 Histo</button>
+                <button id="tab-admin-scales" class="tab-btn" style="flex:1;">⚖️ Barèmes</button>
+                <button id="tab-admin-bounties" class="tab-btn" style="flex:1; background-color: #f3e5f5; color: #8e44ad; border: 1px solid #8e44ad;">📜 Primes</button>
+            </div>
+
+            <div id="content-admin-scales" style="display: none;">
+                <div style="margin-bottom: 15px; background: #fff3e0; padding: 10px; border-radius: 5px; border-left: 4px solid #e67e22; font-size: 0.9em;">
+                    ℹ️ Définissez ici les règles pour les tâches exceptionnelles (Vomi, Toilettes, etc.).
+                </div>
+                
+                <div id="admin-scales-list" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;">
+                    </div>
+
+                <button id="add-scale-btn" class="button" style="width: 100%; background-color: #d35400;">+ Ajouter un barème</button>
+            </div>
+
+            <div id="content-admin-cleaners">
+                <div id="cleaners-list-container" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #eee; padding: 10px; border-radius: 5px;">
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                    <h4 style="margin-top: 0;">Ajouter un nettoyeur</h4>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="new-cleaner-name" placeholder="Prénom" style="flex: 1;">
+                        <input type="color" id="new-cleaner-color" value="#3498db" style="width: 50px; height: 40px; padding: 0; border: none; cursor: pointer;">
+                        <button id="add-cleaner-btn" class="button" style="padding: 0 15px;">Ajouter</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-admin-tasks" style="display: none;">
+                <div id="tasks-config-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <button id="add-category-btn" class="button" style="width: 100%; background-color: #2c3e50;">+ Nouvelle Catégorie</button>
+            </div>
+
+            <div id="content-admin-logs" style="display: none;">
+                <div style="margin-bottom: 15px; background: #e8f6f3; padding: 10px; border-radius: 5px; border-left: 4px solid #1abc9c; font-size: 0.9em;">
+                    ℹ️ Voici le résumé journalier des actions effectuées sur le planning.
+                </div>
+                <div id="logs-list-container" style="max-height: 400px; overflow-y: auto;">
+                    </div>
+            </div>
+
+            <div id="content-admin-tasks" style="display: none;">
+                <div id="tasks-config-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px;">
+                    </div>
+                <button id="add-category-btn" class="button" style="width: 100%; background-color: #2c3e50;">+ Nouvelle Catégorie</button>
+            </div>
+            <div id="content-admin-bounties" style="display: none;">
+                <div style="margin-bottom: 15px; background: #f4ecf7; padding: 10px; border-radius: 5px; border-left: 4px solid #8e44ad; font-size: 0.9em;">
+                    ℹ️ Créez ici des contrats (Primes) pour motiver l'équipe !
+                </div>
+                <div id="admin-bounties-list" style="max-height: 350px; overflow-y: auto; margin-bottom: 15px;"></div>
+                <button id="add-bounty-btn" class="button" style="width: 100%; background-color: #8e44ad;">+ Épingler une nouvelle Prime</button>
+            </div>
+            
+
+        </div>
+    </div>
+    <div id="exceptional-info-modal" class="modal" style="z-index: 2002;">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-button" id="close-exceptional-info">&times;</span>
+            <h2 style="color: #d35400; text-align: center;">🔥 Barème des Tâches Exceptionnelles</h2>
+            <p style="text-align: center; color: #7f8c8d; font-style: italic; margin-bottom: 20px;">
+                Référentiel des points attribués pour les tâches héroïques.
+            </p>
+            
+            <table class="cleaning-table" style="width: 100%;">
+                <thead>
+                    <tr style="background-color: #d35400; color: white;">
+                        <th style="width: 30%;">Tâche</th>
+                        <th style="width: 20%;">Points</th>
+                        <th>Description / Conditions</th>
+                    </tr>
+                </thead>
+                <tbody id="exceptional-info-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="add-exceptional-modal" class="modal" style="z-index: 2005;">
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-button" id="close-add-exceptional">&times;</span>
+            <h2 style="color: #2c3e50;">Ajouter une tâche pour <span id="target-cleaner-name" style="color: #3498db;">...</span></h2>
+            
+            <div class="exceptional-selector-container">
+                <label style="margin-bottom: 10px; display:block; font-weight:bold;">1. Choisir la tâche :</label>
+                <div id="exceptional-options-list" style="max-height: 250px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+                    </div>
+
+                <div class="exceptional-option-row" style="background: #fdf2e9; border-color: #f39c12;">
+                    <input type="radio" name="exceptional-choice" id="choice-other" value="other">
+                    <label for="choice-other" style="font-weight:bold; width: 60px;">Autre :</label>
+                    <input type="text" id="other-task-desc" placeholder="Nom de la tâche..." style="flex: 1; padding: 5px;" disabled>
+                    <input type="number" id="other-task-points" value="1" min="1" style="width: 60px; padding: 5px; text-align: center;" disabled>
+                    <span style="font-size: 0.8em; color: #666;">pts</span>
+                </div>
+            </div>
+
+            <button id="confirm-add-exceptional-btn" class="button" style="width: 100%; margin-top: 15px; background-color: #27ae60;">Valider la tâche</button>
+        </div>
+    </div>
+
+    <div id="prophet-modal" class="modal" style="z-index: 5000;">
+    <div class="modal-content" style="max-width: 400px; text-align: center; border-top: 5px solid #9b59b6;">
+        <span class="close-button" onclick="document.getElementById('prophet-modal').style.display='none'">&times;</span>
+        <div style="font-size: 4em; margin-bottom: 10px;">🔮</div>
+        <h2 style="color: #8e44ad;">Tu es Devin maintenant ?</h2>
+        <p style="font-size: 1.1em; color: #555;">On ne peut pas valider une tâche dans le futur !<br>Attends que ce soit fait.</p>
+        <button class="button" onclick="document.getElementById('prophet-modal').style.display='none'" style="background-color: #9b59b6; margin-top: 15px;">D'accord, je patiente</button>
+    </div>
+</div>
+
+    <div id="task-history-modal" class="modal" style="z-index: 2500;">
+        <div class="modal-content" style="max-width: 420px; max-height: 80vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-task-history-modal">&times;</span>
+            <h3 id="task-history-title" style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px;">📋 Historique</h3>
+            <div id="task-history-list" style="overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 8px;"></div>
+        </div>
+    </div>
+
+    <div id="admin-gate-modal" class="modal" style="z-index: 4000;">
+        <div class="modal-content" style="max-width: 340px; text-align: center;">
+            <span class="close-button" id="close-admin-gate-modal">&times;</span>
+            <h3>🔐 Code administrateur requis</h3>
+            <p id="admin-gate-message" style="font-size: 0.9em; color: #555; white-space: pre-line;"></p>
+            <input type="password" id="admin-gate-input" placeholder="Code PIN" style="text-align: center; font-size: 1.5em; letter-spacing: 5px; margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+            <button id="admin-gate-validate-btn" class="button" style="width: 100%;">Valider</button>
+            <p id="admin-gate-error" style="color: red; display: none; margin-top: 10px;">Code incorrect</p>
+        </div>
+    </div>
+
+    <div id="verification-modal" class="modal" style="z-index: 4500;">
+        <div class="modal-content" style="max-width: 720px; width: 90%; height: 88vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-verification-modal">&times;</span>
+            <h2 id="verification-title" style="margin-top: 0; color: #2c3e50;">🔍 Vérification</h2>
+            <p style="font-size: 0.85em; color: #7f8c8d; margin-top: -8px;">
+                Toutes les tâches écrites ce jour-là, même pour des dates différentes. Cliquez sur ✅ pour signaler un problème : la tâche sera retirée du calendrier et bloquée jusqu'au code admin.
+            </p>
+            <div id="verification-list" style="display: block; flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;"></div>
+            <button id="mark-day-verified-btn" class="button" style="width: 100%; margin-top: 15px; background-color: #27ae60;">✅ Marquer cette journée comme vérifiée</button>
+        </div>
+    </div>
+
+<div id="bounty-board-modal" class="modal" style="z-index: 2005;">
+        <div class="modal-content" style="max-width: 800px; background: transparent; border: none; box-shadow: none;">
+            <span class="close-button" id="close-bounty-board" style="color: white; right: 0; top: -30px; font-size: 40px; text-shadow: 2px 2px 4px black;">&times;</span>
+            <div class="bounty-board-bg" id="bounty-board-container">
+                </div>
+        </div>
+    </div>
+
+    <div id="bounty-detail-modal" class="modal" style="z-index: 2006;">
+        <div class="modal-content" style="max-width: 400px; text-align: center; border: 2px solid #8e44ad; border-radius: 10px;">
+            <span class="close-button" onclick="document.getElementById('bounty-detail-modal').style.display='none'">&times;</span>
+            <div id="detail-bounty-tier" style="font-size: 1.2em; font-weight: bold; margin-bottom: 5px; color: #8e44ad;"></div>
+            <h2 id="detail-bounty-title" style="margin-top: 0;">Titre</h2>
+            <p id="detail-bounty-desc" style="font-size: 0.95em; color: #555; background: #f9f9f9; padding: 15px; border-radius: 5px; font-style: italic;"></p>
+            <div id="detail-bounty-reward" style="font-size: 1.5em; font-weight: bold; color: #d35400; margin: 15px 0;"></div>
+            
+            <div style="margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 15px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold;">⚔️ Qui a accompli cette quête ?</label>
+                <select id="bounty-hero-select" style="width: 100%; padding: 10px; font-size: 1.1em; margin-bottom: 15px;">
+                </select>
+                <button id="validate-bounty-btn" class="button" style="width: 100%; background-color: #27ae60; font-size: 1.1em;">Réclamer la Prime !</button>
+            </div>
+        </div>
+    </div>
+    <div id="mobile-birthdays-modal" class="modal" style="z-index: 2005;">
+        <div class="modal-content" style="max-height: 85vh; display: flex; flex-direction: column;">
+            <span class="close-button" id="close-mobile-birthdays-modal">&times;</span>
+            <h2 style="margin-top: 0; color: #8e44ad;">🎂 Anniversaires</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                <input type="date" id="mobile-candy-list-date" style="flex: 1; min-width: 110px; padding: 6px;">
+                <button type="button" id="mobile-print-candy-list-btn" class="button-secondary" style="background-color: #e67e22; color: white; width: 100%;">🍬 Liste paniers</button>
+            </div>
+            <div id="mobile-birthdays-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;">
+            </div>
+        </div>
+    </div>
+
+<script src="script_v2.js?v=5.15"></script>
+<nav class="mobile-nav">
+    <button class="mobile-nav-btn" data-view="mobile-laser-view">🔫 Laser</button>
+    <button class="mobile-nav-btn" data-view="mobile-qk-view">🎤 Quiz/Kara</button>
+    <button class="mobile-nav-btn" data-view="mobile-chronos-view">⏱️ Chronos</button>
+</nav>
+
+</body>
+</html>

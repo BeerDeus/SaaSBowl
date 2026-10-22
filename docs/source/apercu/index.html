@@ -1,0 +1,7 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#888}canvas{display:block;margin:0 0 10px;background:#fff}</style>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script></head><body><script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+window.rendu = (async () => { const pdf = await pdfjsLib.getDocument(new URLSearchParams(location.search).get('f')).promise;
+  for (let i = 1; i <= pdf.numPages; i++) { const p = await pdf.getPage(i), v = p.getViewport({ scale: 1 }), c = document.createElement('canvas'); c.width = v.width; c.height = v.height; c.id = 'p' + i; document.body.appendChild(c); await p.render({ canvasContext: c.getContext('2d'), viewport: v }).promise; }
+  return pdf.numPages; })();
+</script></body></html>
